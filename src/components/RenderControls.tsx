@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { X } from 'lucide-react';
 import { renderingOptions } from '@/lib/lighting';
 import { Button } from '@/components/ui/button';
@@ -39,9 +39,16 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   setRenderingMode,
   onBack,
 }) => {
+  // Use callbacks to prevent unnecessary re-renders
+  const handleRenderingModeChange = useCallback((value: string) => {
+    setRenderingMode(value);
+  }, [setRenderingMode]);
+
   return (
     <aside
-      className={`controls-panel z-10 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+      className={`fixed right-0 top-0 bottom-0 w-80 max-w-[90vw] bg-white shadow-lg p-6 overflow-y-auto z-50 transform transition-transform duration-300 ease-in-out ${
+        isOpen ? 'translate-x-0' : 'translate-x-full'
+      }`}
     >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold">Rendering Controls</h2>
@@ -104,7 +111,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
 
         <div className="space-y-3">
           <h3 className="text-lg font-medium">Rendering Mode</h3>
-          <RadioGroup value={renderingMode} onValueChange={setRenderingMode} className="space-y-2">
+          <RadioGroup value={renderingMode} onValueChange={handleRenderingModeChange} className="space-y-2">
             {renderingOptions.filter(option => option.id !== 'wireframe').map((option) => (
               <div key={option.id} className="flex items-start space-x-2">
                 <RadioGroupItem value={option.id} id={option.id} />
@@ -131,4 +138,4 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   );
 };
 
-export default RenderControls;
+export default React.memo(RenderControls);

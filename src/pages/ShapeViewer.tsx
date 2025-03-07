@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Menu, ArrowLeft } from 'lucide-react';
 import Scene from '@/components/Scene';
@@ -26,7 +26,7 @@ const ShapeViewer: React.FC = () => {
       // Validate shape ID
       getShapeById(shapeId as ShapeType);
       
-      // Simulate loading time
+      // Simulate loading time only on initial load
       const timer = setTimeout(() => {
         setIsLoading(false);
       }, 800);
@@ -38,9 +38,34 @@ const ShapeViewer: React.FC = () => {
     }
   }, [shapeId, navigate]);
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     navigate('/');
-  };
+  }, [navigate]);
+
+  const toggleControls = useCallback(() => {
+    setControlsOpen(prev => !prev);
+  }, []);
+
+  // Handle render control changes with callbacks to prevent re-renders
+  const handleWireframeChange = useCallback((value: boolean) => {
+    setWireframe(value);
+  }, []);
+
+  const handleAmbientChange = useCallback((value: boolean) => {
+    setAmbient(value);
+  }, []);
+
+  const handleDirectionalChange = useCallback((value: boolean) => {
+    setDirectional(value);
+  }, []);
+
+  const handlePointChange = useCallback((value: boolean) => {
+    setPoint(value);
+  }, []);
+
+  const handleRenderingModeChange = useCallback((value: string) => {
+    setRenderingMode(value);
+  }, []);
 
   return (
     <LoadingTransition isLoading={isLoading}>
@@ -62,7 +87,7 @@ const ShapeViewer: React.FC = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => setControlsOpen(true)}
+            onClick={toggleControls}
             className="h-10 w-10 rounded-full bg-white/80 backdrop-blur-md shadow-sm border border-white/20"
           >
             <Menu className="h-5 w-5" />
@@ -84,15 +109,15 @@ const ShapeViewer: React.FC = () => {
           isOpen={controlsOpen}
           onClose={() => setControlsOpen(false)}
           wireframe={wireframe}
-          setWireframe={setWireframe}
+          setWireframe={handleWireframeChange}
           ambient={ambient}
-          setAmbient={setAmbient}
+          setAmbient={handleAmbientChange}
           directional={directional}
-          setDirectional={setDirectional}
+          setDirectional={handleDirectionalChange}
           point={point}
-          setPoint={setPoint}
+          setPoint={handlePointChange}
           renderingMode={renderingMode}
-          setRenderingMode={setRenderingMode}
+          setRenderingMode={handleRenderingModeChange}
           onBack={handleGoBack}
         />
       </div>

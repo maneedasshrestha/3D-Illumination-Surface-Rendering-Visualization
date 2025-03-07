@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
 import * as THREE from 'three';
@@ -22,10 +22,10 @@ const Shape: React.FC<{
 }> = ({ shapeId, wireframe, renderingMode }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const shape = getShapeById(shapeId);
-  const geometry = shape.geometry();
+  const geometry = useMemo(() => shape.geometry(), [shapeId]);
   
   const effectiveRenderMode = wireframe ? 'wireframe' : renderingMode;
-  const material = createMaterial(effectiveRenderMode);
+  const material = useMemo(() => createMaterial(effectiveRenderMode), [effectiveRenderMode]);
 
   useFrame(() => {
     if (meshRef.current) {
@@ -53,7 +53,7 @@ const Lights: React.FC<{
   ambient: boolean;
   directional: boolean;
   point: boolean;
-}> = ({ ambient, directional, point }) => {
+}> = React.memo(({ ambient, directional, point }) => {
   return (
     <>
       {ambient && (
@@ -82,16 +82,46 @@ const Lights: React.FC<{
       )}
     </>
   );
+});
+
+Lights.displayName = 'Lights';
+
+// This component ensures the Canvas only mounts once
+const CanvasContainer: React.FC<SceneProps> = ({ 
+  shapeId, wireframe, ambient, directional, point, renderingMode 
+}) => {
+  return (
+    <Canvas shadows dpr={[1, 2]} className="shape-canvas">
+      <color attach="background" args={['#f8f9fa']} />
+      
+      <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={40} />
+      
+      <Lights 
+        ambient={ambient} 
+        directional={directional} 
+        point={point} 
+      />
+      
+      <Shape 
+        shapeId={shapeId} 
+        wireframe={wireframe}
+        renderingMode={renderingMode}
+      />
+      
+      <OrbitControls 
+        enableZoom={true}
+        enablePan={true}
+        enableRotate={true}
+        minDistance={2}
+        maxDistance={10}
+      />
+      
+      <Environment preset="sunset" />
+    </Canvas>
+  );
 };
 
-const Scene: React.FC<SceneProps> = ({ 
-  shapeId, 
-  wireframe, 
-  ambient, 
-  directional, 
-  point,
-  renderingMode 
-}) => {
+const Scene: React.FC<SceneProps> = (props) => {
   const [isMounted, setIsMounted] = useState(false);
   
   useEffect(() => {
@@ -103,33 +133,7 @@ const Scene: React.FC<SceneProps> = ({
 
   return (
     <div className="w-full h-full">
-      <Canvas shadows dpr={[1, 2]} className="shape-canvas">
-        <color attach="background" args={['#f8f9fa']} />
-        
-        <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={40} />
-        
-        <Lights 
-          ambient={ambient} 
-          directional={directional} 
-          point={point} 
-        />
-        
-        <Shape 
-          shapeId={shapeId} 
-          wireframe={wireframe}
-          renderingMode={renderingMode}
-        />
-        
-        <OrbitControls 
-          enableZoom={true}
-          enablePan={true}
-          enableRotate={true}
-          minDistance={2}
-          maxDistance={10}
-        />
-        
-        <Environment preset="sunset" />
-      </Canvas>
+      <CanvasContainer {...props} />
     </div>
   );
 };
