@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Environment, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { ShapeType, getShapeById } from '@/lib/shapes';
 import { createMaterial, lightingOptions } from '@/lib/lighting';
@@ -49,6 +49,20 @@ const Shape: React.FC<{
   );
 };
 
+const SpaceBackground: React.FC = () => {
+  return (
+    <Stars 
+      radius={100} 
+      depth={50} 
+      count={5000} 
+      factor={4} 
+      saturation={0} 
+      fade
+      speed={1}
+    />
+  );
+};
+
 const Lights: React.FC<{ 
   ambient: boolean;
   directional: boolean;
@@ -92,9 +106,11 @@ const CanvasContainer: React.FC<SceneProps> = ({
 }) => {
   return (
     <Canvas shadows dpr={[1, 2]} className="shape-canvas">
-      <color attach="background" args={['#f8f9fa']} />
+      <color attach="background" args={['#050A30']} />
       
       <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={40} />
+      
+      <SpaceBackground />
       
       <Lights 
         ambient={ambient} 
@@ -112,8 +128,9 @@ const CanvasContainer: React.FC<SceneProps> = ({
         enableZoom={true}
         enablePan={true}
         enableRotate={true}
-        minDistance={2}
-        maxDistance={10}
+        minDistance={1}
+        maxDistance={20}
+        zoomSpeed={1}
       />
       
       <Environment preset="sunset" />

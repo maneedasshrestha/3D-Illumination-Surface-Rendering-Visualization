@@ -34,6 +34,7 @@ const ShapeCard: React.FC<ShapeCardProps> = ({ shape, index }) => {
 
     // Scene
     const scene = new THREE.Scene();
+    scene.background = new THREE.Color('#050A30');
     sceneRef.current = scene;
 
     // Camera
@@ -48,6 +49,25 @@ const ShapeCard: React.FC<ShapeCardProps> = ({ shape, index }) => {
     const pointLight = new THREE.PointLight(0xffffff, 1);
     pointLight.position.set(5, 5, 5);
     scene.add(pointLight);
+
+    // Add stars to background
+    const starsGeometry = new THREE.BufferGeometry();
+    const starsMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.1,
+    });
+
+    const starsVertices = [];
+    for (let i = 0; i < 1000; i++) {
+      const x = (Math.random() - 0.5) * 100;
+      const y = (Math.random() - 0.5) * 100;
+      const z = (Math.random() - 0.5) * 100;
+      starsVertices.push(x, y, z);
+    }
+
+    starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+    const stars = new THREE.Points(starsGeometry, starsMaterial);
+    scene.add(stars);
 
     // Mesh
     const geometry = shape.geometry();
@@ -68,6 +88,8 @@ const ShapeCard: React.FC<ShapeCardProps> = ({ shape, index }) => {
       
       meshRef.current.rotation.x += 0.005;
       meshRef.current.rotation.y += 0.01;
+      stars.rotation.x += 0.0002;
+      stars.rotation.y += 0.0002;
       
       renderer.render(scene, camera);
       animationId = requestAnimationFrame(animate);
@@ -93,14 +115,14 @@ const ShapeCard: React.FC<ShapeCardProps> = ({ shape, index }) => {
         animationFillMode: 'backwards'
       }}
     >
-      <div className="relative h-52 w-full overflow-hidden rounded-lg bg-black/5">
+      <div className="relative h-52 w-full overflow-hidden rounded-lg bg-[#050A30] border border-blue-900/30">
         <canvas ref={canvasRef} className="h-full w-full" />
       </div>
       <div className="mt-4">
-        <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-lg font-medium text-blue-100 group-hover:text-blue-300 transition-colors">
           {shape.name}
         </h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-blue-300/70">
           Explore lighting and rendering techniques
         </p>
       </div>
