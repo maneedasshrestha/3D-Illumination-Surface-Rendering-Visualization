@@ -17,9 +17,9 @@ const ShapeViewer: React.FC = () => {
   // Rendering states
   const [wireframe, setWireframe] = useState(false);
   const [ambient, setAmbient] = useState(true);
-  const [directional, setDirectional] = useState(true);
-  const [point, setPoint] = useState(false);
-  const [renderingMode, setRenderingMode] = useState('standard');
+  const [diffuse, setDiffuse] = useState(true);
+  const [specular, setSpecular] = useState(false);
+  const [renderingMode, setRenderingMode] = useState('phong');
 
   useEffect(() => {
     try {
@@ -55,12 +55,12 @@ const ShapeViewer: React.FC = () => {
     setAmbient(value);
   }, []);
 
-  const handleDirectionalChange = useCallback((value: boolean) => {
-    setDirectional(value);
+  const handleDiffuseChange = useCallback((value: boolean) => {
+    setDiffuse(value);
   }, []);
 
-  const handlePointChange = useCallback((value: boolean) => {
-    setPoint(value);
+  const handleSpecularChange = useCallback((value: boolean) => {
+    setSpecular(value);
   }, []);
 
   const handleRenderingModeChange = useCallback((value: string) => {
@@ -99,8 +99,8 @@ const ShapeViewer: React.FC = () => {
             shapeId={shapeId as ShapeType}
             wireframe={wireframe}
             ambient={ambient}
-            directional={directional}
-            point={point}
+            diffuse={diffuse}
+            specular={specular}
             renderingMode={renderingMode}
           />
         </div>
@@ -112,10 +112,10 @@ const ShapeViewer: React.FC = () => {
           setWireframe={handleWireframeChange}
           ambient={ambient}
           setAmbient={handleAmbientChange}
-          directional={directional}
-          setDirectional={handleDirectionalChange}
-          point={point}
-          setPoint={handlePointChange}
+          diffuse={diffuse}
+          setDiffuse={handleDiffuseChange}
+          specular={specular}
+          setSpecular={handleSpecularChange}
           renderingMode={renderingMode}
           setRenderingMode={handleRenderingModeChange}
           onBack={handleGoBack}

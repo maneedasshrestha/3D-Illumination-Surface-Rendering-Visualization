@@ -106,7 +106,7 @@
   }
   
   .shape-card {
-    @apply relative overflow-hidden rounded-2xl bg-white p-6 shadow-md transition-all duration-300;
+    @apply relative overflow-hidden rounded-2xl transition-all duration-300;
   }
   
   .shape-card:hover {

@@ -10,8 +10,8 @@ interface SceneProps {
   shapeId: ShapeType;
   wireframe: boolean;
   ambient: boolean;
-  directional: boolean;
-  point: boolean;
+  diffuse: boolean;
+  specular: boolean;
   renderingMode: string;
 }
 
@@ -65,9 +65,9 @@ const SpaceBackground: React.FC = () => {
 
 const Lights: React.FC<{ 
   ambient: boolean;
-  directional: boolean;
-  point: boolean;
-}> = React.memo(({ ambient, directional, point }) => {
+  diffuse: boolean;
+  specular: boolean;
+}> = React.memo(({ ambient, diffuse, specular }) => {
   return (
     <>
       {ambient && (
@@ -77,20 +77,20 @@ const Lights: React.FC<{
         />
       )}
       
-      {directional && (
+      {diffuse && (
         <directionalLight
-          color={new THREE.Color(lightingOptions.directionalLight.defaultColor)}
-          intensity={lightingOptions.directionalLight.defaultIntensity}
-          position={lightingOptions.directionalLight.defaultPosition}
+          color={new THREE.Color(lightingOptions.diffuseLight.defaultColor)}
+          intensity={lightingOptions.diffuseLight.defaultIntensity}
+          position={lightingOptions.diffuseLight.defaultPosition}
           castShadow
         />
       )}
       
-      {point && (
+      {specular && (
         <pointLight
-          color={new THREE.Color(lightingOptions.pointLight.defaultColor)}
-          intensity={lightingOptions.pointLight.defaultIntensity}
-          position={lightingOptions.pointLight.defaultPosition}
+          color={new THREE.Color(lightingOptions.specularLight.defaultColor)}
+          intensity={lightingOptions.specularLight.defaultIntensity}
+          position={lightingOptions.specularLight.defaultPosition}
           castShadow
         />
       )}
@@ -102,7 +102,7 @@ Lights.displayName = 'Lights';
 
 // This component ensures the Canvas only mounts once
 const CanvasContainer: React.FC<SceneProps> = ({ 
-  shapeId, wireframe, ambient, directional, point, renderingMode 
+  shapeId, wireframe, ambient, diffuse, specular, renderingMode 
 }) => {
   return (
     <Canvas shadows dpr={[1, 2]} className="shape-canvas">
@@ -114,8 +114,8 @@ const CanvasContainer: React.FC<SceneProps> = ({
       
       <Lights 
         ambient={ambient} 
-        directional={directional} 
-        point={point} 
+        diffuse={diffuse} 
+        specular={specular} 
       />
       
       <Shape 

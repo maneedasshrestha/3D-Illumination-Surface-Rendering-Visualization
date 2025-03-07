@@ -15,10 +15,10 @@ interface RenderControlsProps {
   setWireframe: (value: boolean) => void;
   ambient: boolean;
   setAmbient: (value: boolean) => void;
-  directional: boolean;
-  setDirectional: (value: boolean) => void;
-  point: boolean;
-  setPoint: (value: boolean) => void;
+  diffuse: boolean;
+  setDiffuse: (value: boolean) => void;
+  specular: boolean;
+  setSpecular: (value: boolean) => void;
   renderingMode: string;
   setRenderingMode: (value: string) => void;
   onBack: () => void;
@@ -31,10 +31,10 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   setWireframe,
   ambient,
   setAmbient,
-  directional,
-  setDirectional,
-  point,
-  setPoint,
+  diffuse,
+  setDiffuse,
+  specular,
+  setSpecular,
   renderingMode,
   setRenderingMode,
   onBack,
@@ -79,7 +79,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
           
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label htmlFor="ambient" className="cursor-pointer">Ambient Light</Label>
+              <Label htmlFor="ambient" className="cursor-pointer">Ambient Illumination</Label>
               <Switch
                 id="ambient"
                 checked={ambient}
@@ -88,20 +88,20 @@ const RenderControls: React.FC<RenderControlsProps> = ({
             </div>
             
             <div className="flex items-center justify-between">
-              <Label htmlFor="directional" className="cursor-pointer">Directional Light</Label>
+              <Label htmlFor="diffuse" className="cursor-pointer">Diffuse Reflection</Label>
               <Switch
-                id="directional"
-                checked={directional}
-                onCheckedChange={setDirectional}
+                id="diffuse"
+                checked={diffuse}
+                onCheckedChange={setDiffuse}
               />
             </div>
             
             <div className="flex items-center justify-between">
-              <Label htmlFor="point" className="cursor-pointer">Point Light</Label>
+              <Label htmlFor="specular" className="cursor-pointer">Specular Reflection</Label>
               <Switch
-                id="point"
-                checked={point}
-                onCheckedChange={setPoint}
+                id="specular"
+                checked={specular}
+                onCheckedChange={setSpecular}
               />
             </div>
           </div>

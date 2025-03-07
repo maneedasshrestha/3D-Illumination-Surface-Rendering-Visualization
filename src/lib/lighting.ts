@@ -21,10 +21,10 @@ export const lightingOptions: Record<string, LightingOption> = {
     defaultIntensity: 0.5,
     defaultColor: '#ffffff',
   },
-  directionalLight: {
-    id: 'directionalLight',
-    name: 'Directional Light',
-    description: 'Light rays travel in parallel from a specific direction',
+  diffuseLight: {
+    id: 'diffuseLight',
+    name: 'Diffuse Light',
+    description: 'Scattered light that creates soft shadows',
     create: () => {
       const light = new THREE.DirectionalLight(0xffffff, 0.8);
       light.castShadow = true;
@@ -36,10 +36,10 @@ export const lightingOptions: Record<string, LightingOption> = {
     defaultIntensity: 0.8,
     defaultColor: '#ffffff',
   },
-  pointLight: {
-    id: 'pointLight',
-    name: 'Point Light',
-    description: 'Emits light in all directions from a single point',
+  specularLight: {
+    id: 'specularLight',
+    name: 'Specular Light',
+    description: 'Creates bright highlights on shiny surfaces',
     create: () => {
       const light = new THREE.PointLight(0xffffff, 1);
       light.castShadow = true;
@@ -48,22 +48,7 @@ export const lightingOptions: Record<string, LightingOption> = {
     defaultPosition: [2, 2, 2],
     defaultIntensity: 1,
     defaultColor: '#ffffff',
-  },
-  spotLight: {
-    id: 'spotLight',
-    name: 'Spot Light',
-    description: 'Emits light in a cone shape from a specific point',
-    create: () => {
-      const light = new THREE.SpotLight(0xffffff, 1);
-      light.castShadow = true;
-      light.angle = Math.PI / 6;
-      light.penumbra = 0.3;
-      return light;
-    },
-    defaultPosition: [3, 3, 3],
-    defaultIntensity: 1,
-    defaultColor: '#ffffff',
-  },
+  }
 };
 
 export interface RenderingOption {
@@ -79,24 +64,24 @@ export const renderingOptions: RenderingOption[] = [
     description: 'Display shape as a wireframe',
   },
   {
-    id: 'solid',
-    name: 'Solid',
-    description: 'Render with a solid material',
+    id: 'constant',
+    name: 'Constant',
+    description: 'Flat shading with no lighting calculations',
+  },
+  {
+    id: 'gouraud',
+    name: 'Gouraud',
+    description: 'Smooth shading with per-vertex lighting calculations',
   },
   {
     id: 'phong',
     name: 'Phong',
-    description: 'Use Phong shading for realistic lighting',
+    description: 'Advanced shading with per-pixel lighting calculations',
   },
   {
-    id: 'lambert',
-    name: 'Lambert',
-    description: 'Use Lambert shading for diffuse surfaces',
-  },
-  {
-    id: 'standard',
-    name: 'PBR',
-    description: 'Physically-based rendering for realistic materials',
+    id: 'fastPhong',
+    name: 'Fast Phong',
+    description: 'Optimized version of Phong shading for better performance',
   },
 ];
 
@@ -107,9 +92,15 @@ export function createMaterial(type: string, color: string = '#ffffff'): THREE.M
         color: new THREE.Color(color), 
         wireframe: true 
       });
-    case 'solid':
+    case 'constant':
       return new THREE.MeshBasicMaterial({ 
-        color: new THREE.Color(color) 
+        color: new THREE.Color(color),
+        flatShading: true
+      });
+    case 'gouraud':
+      return new THREE.MeshLambertMaterial({ 
+        color: new THREE.Color(color),
+        flatShading: false
       });
     case 'phong':
       return new THREE.MeshPhongMaterial({ 
@@ -117,18 +108,15 @@ export function createMaterial(type: string, color: string = '#ffffff'): THREE.M
         shininess: 100,
         specular: new THREE.Color("#ffffff")
       });
-    case 'lambert':
-      return new THREE.MeshLambertMaterial({ 
-        color: new THREE.Color(color) 
-      });
-    case 'standard':
-      return new THREE.MeshStandardMaterial({ 
+    case 'fastPhong':
+      return new THREE.MeshPhongMaterial({ 
         color: new THREE.Color(color),
-        roughness: 0.3,
-        metalness: 0.2
+        shininess: 30,
+        specular: new THREE.Color("#333333"),
+        flatShading: false
       });
     default:
-      return new THREE.MeshStandardMaterial({ 
+      return new THREE.MeshPhongMaterial({ 
         color: new THREE.Color(color) 
       });
   }
