@@ -1,69 +1,66 @@
-# Welcome to your Lovable project
+# 3D Illumination & Surface Rendering Visualization
 
-## Project info
+## Project Overview
 
-**URL**: https://lovable.dev/projects/41c63a0e-aa7e-4aed-9dec-837c351ae18c
+This project aims to simplify the understanding of illumination and surface rendering methods using **Three.js**. The web application provides an interactive 3D environment where users can explore different rendering techniques on various 3D shapes.
 
-## How can I edit this code?
+## Live Demo
 
-There are several ways of editing your application.
+The project is live at: [Illumination & Surface Rendering](https://illumination-surface-rendering.vercel.app/)
 
-**Use Lovable**
+## Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/41c63a0e-aa7e-4aed-9dec-837c351ae18c) and start prompting.
+- **Shape Selection Grid:** Choose from a variety of 3D shapes displayed in a grid layout.
+- **Seamless Transition:** Upon selecting a shape, it smoothly transitions into an interactive 3D canvas.
+- **Customizable Rendering:** Side panel toggles allow users to adjust rendering settings:
+  - Toggle mesh visibility
+  - Enable/disable ambient reflection
+  - Enable/disable diffuse reflection
+  - Enable/disable specular reflection
+- **Interactive Controls:** The selected shape responds to mouse movements, enhancing the visualization experience.
+- **Modern & Mobile-Friendly UI:** The interface is designed with a sleek, responsive layout, making it usable across various devices.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Technologies Used
 
-**Use your preferred IDE**
+- **Three.js** - For rendering 3D graphics
+- **React** - For building a responsive and interactive UI
+- **TypeScript** - For type safety and maintainability
+- **shadcn-ui** - For UI components
+- **Tailwind CSS** - For styling and responsiveness
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## How to Run Locally
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Ensure you have **Node.js** and **npm** installed. Follow these steps:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Navigate to the project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+This will launch the project on a local development server with hot reloading.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Contribution
 
-**Use GitHub Codespaces**
+If you'd like to contribute:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-name`).
+3. Make your changes and commit (`git commit -m 'Add new feature'`).
+4. Push to your branch (`git push origin feature-name`).
+5. Open a Pull Request.
 
-## What technologies are used for this project?
+## License
 
-This project is built with .
+This project is open-source and available under the **MIT License**.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/41c63a0e-aa7e-4aed-9dec-837c351ae18c) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
