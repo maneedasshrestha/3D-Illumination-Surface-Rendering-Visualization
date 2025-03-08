@@ -1,12 +1,14 @@
 
 import React, { useCallback } from 'react';
 import { X } from 'lucide-react';
-import { renderingOptions } from '@/lib/lighting';
+import { renderingOptions, backgroundOptions } from '@/lib/lighting';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface RenderControlsProps {
   isOpen: boolean;
@@ -21,6 +23,10 @@ interface RenderControlsProps {
   setSpecular: (value: boolean) => void;
   renderingMode: string;
   setRenderingMode: (value: string) => void;
+  shapeColor: string;
+  setShapeColor: (value: string) => void;
+  background: string;
+  setBackground: (value: string) => void;
   onBack: () => void;
 }
 
@@ -37,6 +43,10 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   setSpecular,
   renderingMode,
   setRenderingMode,
+  shapeColor,
+  setShapeColor,
+  background,
+  setBackground,
   onBack,
 }) => {
   // Use callbacks to prevent unnecessary re-renders
@@ -44,9 +54,17 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     setRenderingMode(value);
   }, [setRenderingMode]);
 
+  const handleColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setShapeColor(e.target.value);
+  }, [setShapeColor]);
+
+  const handleBackgroundChange = useCallback((value: string) => {
+    setBackground(value);
+  }, [setBackground]);
+
   return (
     <aside
-      className={`fixed right-0 top-0 bottom-0 w-80 max-w-[90vw] bg-white shadow-lg p-6 overflow-y-auto z-50 transform transition-transform duration-300 ease-in-out ${
+      className={`fixed right-0 top-0 bottom-0 w-80 max-w-[90vw] bg-background shadow-lg border-l border-border p-6 overflow-y-auto z-50 transform transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
@@ -69,6 +87,48 @@ const RenderControls: React.FC<RenderControlsProps> = ({
               checked={wireframe}
               onCheckedChange={setWireframe}
             />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="shapeColor">Shape Color</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="shapeColor"
+                type="color"
+                value={shapeColor}
+                onChange={handleColorChange}
+                className="w-12 h-10 p-1"
+              />
+              <Input
+                type="text"
+                value={shapeColor}
+                onChange={handleColorChange}
+                className="flex-1"
+                placeholder="#ffffff"
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="background">Background</Label>
+            <Select value={background} onValueChange={handleBackgroundChange}>
+              <SelectTrigger id="background">
+                <SelectValue placeholder="Select background" />
+              </SelectTrigger>
+              <SelectContent>
+                {backgroundOptions.map(option => (
+                  <SelectItem key={option.id} value={option.id}>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-4 h-4 rounded-full" 
+                        style={{ backgroundColor: option.color }}
+                      />
+                      {option.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

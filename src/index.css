@@ -102,7 +102,7 @@
 
 @layer components {
   .glass {
-    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-sm;
+    @apply bg-background/70 backdrop-blur-xl border border-border shadow-sm;
   }
   
   .shape-card {

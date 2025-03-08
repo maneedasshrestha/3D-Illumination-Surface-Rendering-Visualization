@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { ShapeType, getShapeById } from '@/lib/shapes';
-import { createMaterial, lightingOptions } from '@/lib/lighting';
+import { createMaterial, lightingOptions, backgroundOptions } from '@/lib/lighting';
 
 interface SceneProps {
   shapeId: ShapeType;
@@ -13,19 +13,22 @@ interface SceneProps {
   diffuse: boolean;
   specular: boolean;
   renderingMode: string;
+  shapeColor: string;
+  background: string;
 }
 
 const Shape: React.FC<{ 
   shapeId: ShapeType;
   wireframe: boolean;
   renderingMode: string;
-}> = ({ shapeId, wireframe, renderingMode }) => {
+  shapeColor: string;
+}> = ({ shapeId, wireframe, renderingMode, shapeColor }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const shape = getShapeById(shapeId);
   const geometry = useMemo(() => shape.geometry(), [shapeId]);
   
   const effectiveRenderMode = wireframe ? 'wireframe' : renderingMode;
-  const material = useMemo(() => createMaterial(effectiveRenderMode), [effectiveRenderMode]);
+  const material = useMemo(() => createMaterial(effectiveRenderMode, shapeColor), [effectiveRenderMode, shapeColor]);
 
   useFrame(() => {
     if (meshRef.current) {
@@ -102,15 +105,22 @@ Lights.displayName = 'Lights';
 
 // This component ensures the Canvas only mounts once
 const CanvasContainer: React.FC<SceneProps> = ({ 
-  shapeId, wireframe, ambient, diffuse, specular, renderingMode 
+  shapeId, wireframe, ambient, diffuse, specular, renderingMode, shapeColor, background 
 }) => {
+  const bgColor = useMemo(() => {
+    const bgOption = backgroundOptions.find(option => option.id === background);
+    return bgOption ? bgOption.color : '#050A30';
+  }, [background]);
+
+  const showStars = background === 'space';
+
   return (
     <Canvas shadows dpr={[1, 2]} className="shape-canvas">
-      <color attach="background" args={['#050A30']} />
+      <color attach="background" args={[bgColor]} />
       
       <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={40} />
       
-      <SpaceBackground />
+      {showStars && <SpaceBackground />}
       
       <Lights 
         ambient={ambient} 
@@ -122,6 +132,7 @@ const CanvasContainer: React.FC<SceneProps> = ({
         shapeId={shapeId} 
         wireframe={wireframe}
         renderingMode={renderingMode}
+        shapeColor={shapeColor}
       />
       
       <OrbitControls 

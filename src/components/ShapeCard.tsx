@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import * as THREE from 'three';
 import { ShapeDefinition } from '@/lib/shapes';
 import { createMaterial } from '@/lib/lighting';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ShapeCardProps {
   shape: ShapeDefinition;
@@ -34,7 +35,7 @@ const ShapeCard: React.FC<ShapeCardProps> = ({ shape, index }) => {
 
     // Scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#050A30');
+    scene.background = new THREE.Color('#09090b');
     sceneRef.current = scene;
 
     // Camera
@@ -54,11 +55,11 @@ const ShapeCard: React.FC<ShapeCardProps> = ({ shape, index }) => {
     const starsGeometry = new THREE.BufferGeometry();
     const starsMaterial = new THREE.PointsMaterial({
       color: 0xffffff,
-      size: 0.1,
+      size: 0.05,
     });
 
     const starsVertices = [];
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 500; i++) {
       const x = (Math.random() - 0.5) * 100;
       const y = (Math.random() - 0.5) * 100;
       const z = (Math.random() - 0.5) * 100;
@@ -109,23 +110,25 @@ const ShapeCard: React.FC<ShapeCardProps> = ({ shape, index }) => {
   return (
     <Link 
       to={`/view/${shape.id}`} 
-      className="shape-card group"
+      className="block"
       style={{ 
         animationDelay: `${index * 0.1}s`,
         animationFillMode: 'backwards'
       }}
     >
-      <div className="relative h-52 w-full overflow-hidden rounded-lg bg-[#050A30] border border-blue-900/30">
-        <canvas ref={canvasRef} className="h-full w-full" />
-      </div>
-      <div className="mt-4">
-        <h3 className="text-lg font-medium text-blue-100 group-hover:text-blue-300 transition-colors">
-          {shape.name}
-        </h3>
-        <p className="mt-1 text-sm text-blue-300/70">
-          Explore lighting and rendering techniques
-        </p>
-      </div>
+      <Card className="overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-md">
+        <div className="relative h-48 w-full overflow-hidden bg-black">
+          <canvas ref={canvasRef} className="h-full w-full" />
+        </div>
+        <CardContent className="p-4">
+          <h3 className="text-lg font-medium text-foreground">
+            {shape.name}
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Explore lighting and rendering
+          </p>
+        </CardContent>
+      </Card>
     </Link>
   );
 };

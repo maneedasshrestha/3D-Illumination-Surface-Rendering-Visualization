@@ -59,11 +59,6 @@ export interface RenderingOption {
 
 export const renderingOptions: RenderingOption[] = [
   {
-    id: 'wireframe',
-    name: 'Wireframe',
-    description: 'Display shape as a wireframe',
-  },
-  {
     id: 'constant',
     name: 'Constant',
     description: 'Flat shading with no lighting calculations',
@@ -83,6 +78,45 @@ export const renderingOptions: RenderingOption[] = [
     name: 'Fast Phong',
     description: 'Optimized version of Phong shading for better performance',
   },
+  {
+    id: 'wireframe',
+    name: 'Wireframe',
+    description: 'Display shape as a wireframe',
+  },
+];
+
+export interface BackgroundOption {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export const backgroundOptions: BackgroundOption[] = [
+  {
+    id: 'space',
+    name: 'Space',
+    color: '#050A30',
+  },
+  {
+    id: 'minimal',
+    name: 'Minimal',
+    color: '#f8fafc',
+  },
+  {
+    id: 'dark',
+    name: 'Dark',
+    color: '#09090b',
+  },
+  {
+    id: 'blue',
+    name: 'Blue',
+    color: '#0c4a6e',
+  },
+  {
+    id: 'green',
+    name: 'Green',
+    color: '#14532d',
+  },
 ];
 
 export function createMaterial(type: string, color: string = '#ffffff'): THREE.Material {
@@ -94,13 +128,11 @@ export function createMaterial(type: string, color: string = '#ffffff'): THREE.M
       });
     case 'constant':
       return new THREE.MeshBasicMaterial({ 
-        color: new THREE.Color(color),
-        flatShading: true
+        color: new THREE.Color(color)
       });
     case 'gouraud':
       return new THREE.MeshLambertMaterial({ 
-        color: new THREE.Color(color),
-        flatShading: false
+        color: new THREE.Color(color)
       });
     case 'phong':
       return new THREE.MeshPhongMaterial({ 
@@ -112,8 +144,7 @@ export function createMaterial(type: string, color: string = '#ffffff'): THREE.M
       return new THREE.MeshPhongMaterial({ 
         color: new THREE.Color(color),
         shininess: 30,
-        specular: new THREE.Color("#333333"),
-        flatShading: false
+        specular: new THREE.Color("#333333")
       });
     default:
       return new THREE.MeshPhongMaterial({ 

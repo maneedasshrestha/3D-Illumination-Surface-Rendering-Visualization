@@ -20,6 +20,8 @@ const ShapeViewer: React.FC = () => {
   const [diffuse, setDiffuse] = useState(true);
   const [specular, setSpecular] = useState(false);
   const [renderingMode, setRenderingMode] = useState('phong');
+  const [shapeColor, setShapeColor] = useState('#ffffff');
+  const [background, setBackground] = useState('space');
 
   useEffect(() => {
     try {
@@ -67,15 +69,23 @@ const ShapeViewer: React.FC = () => {
     setRenderingMode(value);
   }, []);
 
+  const handleShapeColorChange = useCallback((value: string) => {
+    setShapeColor(value);
+  }, []);
+
+  const handleBackgroundChange = useCallback((value: string) => {
+    setBackground(value);
+  }, []);
+
   return (
     <LoadingTransition isLoading={isLoading}>
-      <div className="relative min-h-screen bg-gradient-to-b from-white to-gray-50">
+      <div className="relative min-h-screen bg-background">
         <header className="absolute top-0 left-0 right-0 z-10 px-4 py-4 sm:px-6 flex justify-between items-center">
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="icon"
             onClick={handleGoBack}
-            className="h-10 w-10 rounded-full bg-white/80 backdrop-blur-md shadow-sm border border-white/20"
+            className="h-10 w-10 rounded-full border"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -85,10 +95,10 @@ const ShapeViewer: React.FC = () => {
           </h1>
           
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="icon"
             onClick={toggleControls}
-            className="h-10 w-10 rounded-full bg-white/80 backdrop-blur-md shadow-sm border border-white/20"
+            className="h-10 w-10 rounded-full border"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -102,6 +112,8 @@ const ShapeViewer: React.FC = () => {
             diffuse={diffuse}
             specular={specular}
             renderingMode={renderingMode}
+            shapeColor={shapeColor}
+            background={background}
           />
         </div>
         
@@ -118,6 +130,10 @@ const ShapeViewer: React.FC = () => {
           setSpecular={handleSpecularChange}
           renderingMode={renderingMode}
           setRenderingMode={handleRenderingModeChange}
+          shapeColor={shapeColor}
+          setShapeColor={handleShapeColorChange}
+          background={background}
+          setBackground={handleBackgroundChange}
           onBack={handleGoBack}
         />
       </div>
