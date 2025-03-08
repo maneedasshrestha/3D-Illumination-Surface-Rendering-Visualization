@@ -1,3 +1,4 @@
+
 import * as THREE from 'three';
 
 export interface LightingOption {
@@ -52,6 +53,66 @@ export const lightingOptions: Record<string, LightingOption> = {
     visibleHelper: true,
   }
 };
+
+export interface LightingPreset {
+  id: string;
+  name: string;
+  description: string;
+  ambientColor: string;
+  diffuseColor: string;
+  specularColor: string;
+}
+
+export const lightingPresets: LightingPreset[] = [
+  {
+    id: 'default',
+    name: 'White (Default)',
+    description: 'Standard white lighting for clear visibility',
+    ambientColor: '#ffffff',
+    diffuseColor: '#ffffff',
+    specularColor: '#ffffff'
+  },
+  {
+    id: 'warm',
+    name: 'Warm',
+    description: 'Warm yellow-orange lighting for a cozy feel',
+    ambientColor: '#fff5e0',
+    diffuseColor: '#ffcc80',
+    specularColor: '#ffa726'
+  },
+  {
+    id: 'cool',
+    name: 'Cool',
+    description: 'Cool blue lighting for a modern look',
+    ambientColor: '#e0f7ff',
+    diffuseColor: '#80d8ff',
+    specularColor: '#40c4ff'
+  },
+  {
+    id: 'dramatic',
+    name: 'Dramatic',
+    description: 'High contrast lighting for dramatic effect',
+    ambientColor: '#202020',
+    diffuseColor: '#ffffff',
+    specularColor: '#ffffff'
+  },
+  {
+    id: 'sunset',
+    name: 'Sunset',
+    description: 'Orange and purple tones like a sunset',
+    ambientColor: '#381c2a',
+    diffuseColor: '#ff7e5f',
+    specularColor: '#feb47b'
+  },
+  {
+    id: 'disco',
+    name: 'Disco',
+    description: 'Colorful lighting for a fun atmosphere',
+    ambientColor: '#9c27b0',
+    diffuseColor: '#00e676',
+    specularColor: '#ff1744'
+  }
+];
 
 export interface RenderingOption {
   id: string;

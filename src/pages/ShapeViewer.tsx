@@ -7,7 +7,7 @@ import RenderControls from '@/components/RenderControls';
 import LoadingTransition from '@/components/LoadingTransition';
 import { ShapeType, getShapeById } from '@/lib/shapes';
 import { Button } from '@/components/ui/button';
-import { lightingOptions } from '@/lib/lighting';
+import { lightingOptions, lightingPresets } from '@/lib/lighting';
 
 const ShapeViewer: React.FC = () => {
   const { shapeId = 'cube' } = useParams<{ shapeId: ShapeType }>();
@@ -24,14 +24,25 @@ const ShapeViewer: React.FC = () => {
   const [shapeColor, setShapeColor] = useState('#ffffff');
   const [background, setBackground] = useState('space');
   
-  // Light colors
-  const [ambientLightColor, setAmbientLightColor] = useState(lightingOptions.ambientLight.defaultColor);
-  const [diffuseLightColor, setDiffuseLightColor] = useState(lightingOptions.diffuseLight.defaultColor);
-  const [specularLightColor, setSpecularLightColor] = useState(lightingOptions.specularLight.defaultColor);
+  // Light presets and individual light colors
+  const [lightingPreset, setLightingPreset] = useState('default');
+  const [ambientLightColor, setAmbientLightColor] = useState(lightingPresets[0].ambientColor);
+  const [diffuseLightColor, setDiffuseLightColor] = useState(lightingPresets[0].diffuseColor);
+  const [specularLightColor, setSpecularLightColor] = useState(lightingPresets[0].specularColor);
   const [showLightHelpers, setShowLightHelpers] = useState(true);
   
   // Custom model state
   const [customModel, setCustomModel] = useState<THREE.Object3D | undefined>(undefined);
+
+  // Update light colors when preset changes
+  useEffect(() => {
+    const preset = lightingPresets.find(p => p.id === lightingPreset);
+    if (preset) {
+      setAmbientLightColor(preset.ambientColor);
+      setDiffuseLightColor(preset.diffuseColor);
+      setSpecularLightColor(preset.specularColor);
+    }
+  }, [lightingPreset]);
 
   useEffect(() => {
     try {
@@ -94,16 +105,8 @@ const ShapeViewer: React.FC = () => {
     setBackground(value);
   }, []);
   
-  const handleAmbientLightColorChange = useCallback((value: string) => {
-    setAmbientLightColor(value);
-  }, []);
-  
-  const handleDiffuseLightColorChange = useCallback((value: string) => {
-    setDiffuseLightColor(value);
-  }, []);
-  
-  const handleSpecularLightColorChange = useCallback((value: string) => {
-    setSpecularLightColor(value);
+  const handleLightingPresetChange = useCallback((value: string) => {
+    setLightingPreset(value);
   }, []);
   
   const handleShowLightHelpersChange = useCallback((value: boolean) => {
@@ -112,7 +115,7 @@ const ShapeViewer: React.FC = () => {
 
   // Get the display name for the current shape
   const shapeDisplayName = shapeId === 'customModel' 
-    ? 'Custom Model' 
+    ? sessionStorage.getItem('customModelName') || 'Custom Model' 
     : (shapeId && getShapeById(shapeId as ShapeType).name);
 
   return (
@@ -177,12 +180,8 @@ const ShapeViewer: React.FC = () => {
           setShapeColor={handleShapeColorChange}
           background={background}
           setBackground={handleBackgroundChange}
-          ambientLightColor={ambientLightColor}
-          setAmbientLightColor={handleAmbientLightColorChange}
-          diffuseLightColor={diffuseLightColor}
-          setDiffuseLightColor={handleDiffuseLightColorChange}
-          specularLightColor={specularLightColor}
-          setSpecularLightColor={handleSpecularLightColorChange}
+          lightingPreset={lightingPreset}
+          setLightingPreset={handleLightingPresetChange}
           showLightHelpers={showLightHelpers}
           setShowLightHelpers={handleShowLightHelpersChange}
           onBack={handleGoBack}
