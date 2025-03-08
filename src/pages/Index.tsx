@@ -37,6 +37,7 @@ const Index: React.FC = () => {
           description: "Please upload a file smaller than 50MB",
           variant: "destructive",
         });
+        setIsUploading(false);
         return;
       }
       
@@ -45,12 +46,17 @@ const Index: React.FC = () => {
         description: `Processing "${file.name}"...`,
       });
       
-      // Load the model
-      const model = await loadModel(file);
-      
-      // Store the loaded model in sessionStorage (as a flag since we can't store the object)
-      sessionStorage.setItem('customModelUploaded', 'true');
+      // Store model metadata in sessionStorage
       sessionStorage.setItem('customModelName', file.name);
+      sessionStorage.setItem('customModelFormat', file.name.split('.').pop()?.toLowerCase() || '');
+      
+      // We don't need to actually load the model here, just confirm the file is valid
+      await loadModel(file);
+      
+      // Create a blob URL for the file and store it
+      const fileURL = URL.createObjectURL(file);
+      sessionStorage.setItem('customModelURL', fileURL);
+      sessionStorage.setItem('customModelUploaded', 'true');
       
       toast({
         title: "Model loaded",
@@ -89,20 +95,22 @@ const Index: React.FC = () => {
             </p>
             
             <div className="mt-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <label htmlFor="file-upload">
-                <Button className="gap-2" variant="outline" disabled={isUploading}>
-                  <Upload size={18} />
-                  {isUploading ? 'Uploading...' : 'Upload Custom 3D Model'}
-                  <input
-                    id="file-upload"
-                    type="file"
-                    accept=".obj,.gltf,.glb,.stl"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                    disabled={isUploading}
-                  />
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <Button className="gap-2" variant="outline" disabled={isUploading} asChild>
+                  <span>
+                    <Upload size={18} />
+                    {isUploading ? 'Uploading...' : 'Upload Custom 3D Model'}
+                  </span>
                 </Button>
               </label>
+              <input
+                id="file-upload"
+                type="file"
+                accept=".obj,.gltf,.glb,.stl"
+                className="hidden"
+                onChange={handleFileUpload}
+                disabled={isUploading}
+              />
               <p className="mt-2 text-sm text-muted-foreground">
                 Supported formats: OBJ, GLTF, GLB, STL
               </p>

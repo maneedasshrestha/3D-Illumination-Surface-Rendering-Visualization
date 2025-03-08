@@ -8,12 +8,15 @@ import LoadingTransition from '@/components/LoadingTransition';
 import { ShapeType, getShapeById } from '@/lib/shapes';
 import { Button } from '@/components/ui/button';
 import { lightingOptions, lightingPresets } from '@/lib/lighting';
+import { loadModel } from '@/lib/modelLoader';
+import { useToast } from '@/hooks/use-toast';
 
 const ShapeViewer: React.FC = () => {
   const { shapeId = 'cube' } = useParams<{ shapeId: ShapeType }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [controlsOpen, setControlsOpen] = useState(false);
+  const { toast } = useToast();
   
   // Rendering states
   const [wireframe, setWireframe] = useState(false);
@@ -32,7 +35,8 @@ const ShapeViewer: React.FC = () => {
   const [showLightHelpers, setShowLightHelpers] = useState(true);
   
   // Custom model state
-  const [customModel, setCustomModel] = useState<THREE.Object3D | undefined>(undefined);
+  const [customModel, setCustomModel] = useState<THREE.Object3D | null>(null);
+  const [customModelLoading, setCustomModelLoading] = useState(false);
 
   // Update light colors when preset changes
   useEffect(() => {
@@ -45,12 +49,58 @@ const ShapeViewer: React.FC = () => {
   }, [lightingPreset]);
 
   useEffect(() => {
+    const loadCustomModel = async () => {
+      if (shapeId !== 'customModel') return;
+      
+      const isCustomModelUploaded = sessionStorage.getItem('customModelUploaded');
+      const modelURL = sessionStorage.getItem('customModelURL');
+      const modelName = sessionStorage.getItem('customModelName');
+      
+      if (isCustomModelUploaded !== 'true' || !modelURL || !modelName) {
+        toast({
+          title: "No model found",
+          description: "Please upload a model first",
+          variant: "destructive",
+        });
+        navigate('/');
+        return;
+      }
+      
+      try {
+        setCustomModelLoading(true);
+        console.log('Loading custom model from URL:', modelURL);
+        
+        // Fetch the file from the stored URL
+        const response = await fetch(modelURL);
+        const blob = await response.blob();
+        
+        // Create a File object to pass to loadModel
+        const file = new File([blob], modelName, {
+          type: blob.type || 'application/octet-stream'
+        });
+        
+        // Load the model
+        const loadedModel = await loadModel(file);
+        console.log('Custom model loaded:', loadedModel);
+        setCustomModel(loadedModel);
+      } catch (error) {
+        console.error('Error loading custom model:', error);
+        toast({
+          title: "Error loading model",
+          description: "Failed to load the custom model",
+          variant: "destructive",
+        });
+        navigate('/');
+      } finally {
+        setCustomModelLoading(false);
+        setIsLoading(false);
+      }
+    };
+
     try {
       // Check if this is a custom model
       if (shapeId === 'customModel') {
-        // The custom model will be loaded from state
-        // Set isLoading to false since we'll handle the model in the Scene component
-        setIsLoading(false);
+        loadCustomModel();
       } else {
         // Validate shape ID
         getShapeById(shapeId as ShapeType);
@@ -66,7 +116,7 @@ const ShapeViewer: React.FC = () => {
       console.error('Invalid shape ID:', error);
       navigate('/');
     }
-  }, [shapeId, navigate]);
+  }, [shapeId, navigate, toast]);
 
   const handleGoBack = useCallback(() => {
     navigate('/');
@@ -118,8 +168,11 @@ const ShapeViewer: React.FC = () => {
     ? sessionStorage.getItem('customModelName') || 'Custom Model' 
     : (shapeId && getShapeById(shapeId as ShapeType).name);
 
+  // Show loading if custom model is still loading
+  const showLoading = isLoading || (shapeId === 'customModel' && customModelLoading);
+
   return (
-    <LoadingTransition isLoading={isLoading}>
+    <LoadingTransition isLoading={showLoading}>
       <div className="relative min-h-screen bg-background">
         <header className="absolute top-0 left-0 right-0 z-10 px-4 py-4 sm:px-6 flex justify-between items-center">
           <Button 
@@ -146,21 +199,23 @@ const ShapeViewer: React.FC = () => {
         </header>
         
         <div className="h-screen w-screen">
-          <Scene
-            shapeId={shapeId as ShapeType}
-            wireframe={wireframe}
-            ambient={ambient}
-            diffuse={diffuse}
-            specular={specular}
-            renderingMode={renderingMode}
-            shapeColor={shapeColor}
-            background={background}
-            ambientLightColor={ambientLightColor}
-            diffuseLightColor={diffuseLightColor}
-            specularLightColor={specularLightColor}
-            showLightHelpers={showLightHelpers}
-            customModel={customModel}
-          />
+          {(shapeId !== 'customModel' || (shapeId === 'customModel' && customModel)) && (
+            <Scene
+              shapeId={shapeId as ShapeType}
+              wireframe={wireframe}
+              ambient={ambient}
+              diffuse={diffuse}
+              specular={specular}
+              renderingMode={renderingMode}
+              shapeColor={shapeColor}
+              background={background}
+              ambientLightColor={ambientLightColor}
+              diffuseLightColor={diffuseLightColor}
+              specularLightColor={specularLightColor}
+              showLightHelpers={showLightHelpers}
+              customModel={customModel}
+            />
+          )}
         </div>
         
         <RenderControls

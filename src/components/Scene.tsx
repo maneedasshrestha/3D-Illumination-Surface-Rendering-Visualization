@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Stars } from '@react-three/drei';
@@ -18,7 +19,7 @@ interface SceneProps {
   diffuseLightColor?: string;
   specularLightColor?: string;
   showLightHelpers?: boolean;
-  customModel?: THREE.Object3D;
+  customModel?: THREE.Object3D | null;
 }
 
 const Shape: React.FC<{ 
@@ -26,26 +27,77 @@ const Shape: React.FC<{
   wireframe: boolean;
   renderingMode: string;
   shapeColor: string;
-  customModel?: THREE.Object3D;
+  customModel?: THREE.Object3D | null;
 }> = ({ shapeId, wireframe, renderingMode, shapeColor, customModel }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   
-  if (customModel) {
+  // Handle custom model if provided
+  if (shapeId === 'customModel' && customModel) {
+    console.log('Rendering custom model:', customModel);
+    
+    // Apply material to custom model
+    useEffect(() => {
+      if (!customModel) return;
+      
+      const material = createMaterial(wireframe ? 'wireframe' : renderingMode, shapeColor);
+      
+      customModel.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          // Store original material to avoid memory leaks
+          if (!child.userData.originalMaterial) {
+            child.userData.originalMaterial = child.material;
+          }
+          child.material = material;
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+      
+      return () => {
+        // Restore original materials when component unmounts
+        customModel.traverse((child) => {
+          if (child instanceof THREE.Mesh && child.userData.originalMaterial) {
+            child.material = child.userData.originalMaterial;
+          }
+        });
+      };
+    }, [customModel, wireframe, renderingMode, shapeColor]);
+    
     useFrame(() => {
       if (groupRef.current) {
-        groupRef.current.rotation.x += 0.002;
-        groupRef.current.rotation.y += 0.002;
+        groupRef.current.rotation.y += 0.005;
       }
     });
 
+    // Center and scale the model
+    useEffect(() => {
+      if (!customModel || !groupRef.current) return;
+      
+      // Calculate bounding box to center the model
+      const box = new THREE.Box3().setFromObject(customModel);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      
+      // Calculate scale to normalize the model size
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const scale = 2 / maxDim;
+      
+      // Apply transformations to the group
+      if (groupRef.current) {
+        groupRef.current.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+        groupRef.current.scale.set(scale, scale, scale);
+      }
+    }, [customModel]);
+
     return (
-      <group ref={groupRef} scale={[0.5, 0.5, 0.5]}>
+      <group ref={groupRef}>
         <primitive object={customModel} />
       </group>
     );
   }
   
+  // Regular shape rendering
   const shape = getShapeById(shapeId);
   const geometry = useMemo(() => shape.geometry(), [shapeId]);
   

@@ -31,11 +31,15 @@ export function loadModel(file: File): Promise<THREE.Object3D> {
         fileURL,
         (object) => {
           URL.revokeObjectURL(fileURL);
+          console.log('OBJ model loaded successfully', object);
           resolve(object);
         },
-        undefined,
+        (xhr) => {
+          console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
         (error) => {
           URL.revokeObjectURL(fileURL);
+          console.error('Error loading OBJ model:', error);
           reject(error);
         }
       );
@@ -45,11 +49,15 @@ export function loadModel(file: File): Promise<THREE.Object3D> {
         fileURL,
         (gltf) => {
           URL.revokeObjectURL(fileURL);
+          console.log('GLTF/GLB model loaded successfully', gltf.scene);
           resolve(gltf.scene);
         },
-        undefined,
+        (xhr) => {
+          console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
         (error) => {
           URL.revokeObjectURL(fileURL);
+          console.error('Error loading GLTF/GLB model:', error);
           reject(error);
         }
       );
@@ -59,13 +67,17 @@ export function loadModel(file: File): Promise<THREE.Object3D> {
         fileURL,
         (geometry) => {
           URL.revokeObjectURL(fileURL);
+          console.log('STL geometry loaded successfully');
           const material = new THREE.MeshStandardMaterial({ color: 0xAAAAAA });
           const mesh = new THREE.Mesh(geometry, material);
           resolve(mesh);
         },
-        undefined,
+        (xhr) => {
+          console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
         (error) => {
           URL.revokeObjectURL(fileURL);
+          console.error('Error loading STL model:', error);
           reject(error);
         }
       );
