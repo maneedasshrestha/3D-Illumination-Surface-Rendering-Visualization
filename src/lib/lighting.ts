@@ -1,14 +1,14 @@
-
 import * as THREE from 'three';
 
 export interface LightingOption {
   id: string;
   name: string;
   description: string;
-  create: () => THREE.Light;
+  create: (color: string, intensity: number, visible: boolean) => THREE.Light;
   defaultPosition: [number, number, number];
   defaultIntensity: number;
   defaultColor: string;
+  visibleHelper?: boolean;
 }
 
 export const lightingOptions: Record<string, LightingOption> = {
@@ -16,7 +16,7 @@ export const lightingOptions: Record<string, LightingOption> = {
     id: 'ambientLight',
     name: 'Ambient Light',
     description: 'Illuminates all objects equally without casting shadows',
-    create: () => new THREE.AmbientLight(0xffffff, 0.5),
+    create: (color: string, intensity: number) => new THREE.AmbientLight(color, intensity),
     defaultPosition: [0, 0, 0],
     defaultIntensity: 0.5,
     defaultColor: '#ffffff',
@@ -25,8 +25,8 @@ export const lightingOptions: Record<string, LightingOption> = {
     id: 'diffuseLight',
     name: 'Diffuse Light',
     description: 'Scattered light that creates soft shadows',
-    create: () => {
-      const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    create: (color: string, intensity: number, visible: boolean) => {
+      const light = new THREE.DirectionalLight(color, intensity);
       light.castShadow = true;
       light.shadow.mapSize.width = 1024;
       light.shadow.mapSize.height = 1024;
@@ -35,19 +35,21 @@ export const lightingOptions: Record<string, LightingOption> = {
     defaultPosition: [5, 5, 5],
     defaultIntensity: 0.8,
     defaultColor: '#ffffff',
+    visibleHelper: true,
   },
   specularLight: {
     id: 'specularLight',
     name: 'Specular Light',
     description: 'Creates bright highlights on shiny surfaces',
-    create: () => {
-      const light = new THREE.PointLight(0xffffff, 1);
+    create: (color: string, intensity: number, visible: boolean) => {
+      const light = new THREE.PointLight(color, intensity);
       light.castShadow = true;
       return light;
     },
     defaultPosition: [2, 2, 2],
     defaultIntensity: 1,
     defaultColor: '#ffffff',
+    visibleHelper: true,
   }
 };
 
@@ -95,7 +97,7 @@ export const backgroundOptions: BackgroundOption[] = [
   {
     id: 'space',
     name: 'Space',
-    color: '#050A30',
+    color: '#000000',
   },
   {
     id: 'minimal',

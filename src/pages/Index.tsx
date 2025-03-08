@@ -5,10 +5,12 @@ import ShapeGrid from '@/components/ShapeGrid';
 import LoadingTransition from '@/components/LoadingTransition';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { loadModel } from '@/lib/modelLoader';
 
 const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -21,19 +23,51 @@ const Index: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // For demonstration purposes - in a real app you would process the 3D model file
-      // and create a URL for it or store it in state
+    if (!file) return;
+    
+    try {
+      setIsUploading(true);
+      
+      // Check file size
+      if (file.size > 50 * 1024 * 1024) { // 50MB limit
+        toast({
+          title: "File too large",
+          description: "Please upload a file smaller than 50MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       toast({
-        title: "Model Upload",
-        description: `Custom model "${file.name}" would be uploaded and processed here`,
+        title: "Loading model",
+        description: `Processing "${file.name}"...`,
       });
       
-      // Navigate to a special view for custom models - in a real implementation
-      // you would pass the model data or URL
+      // Load the model
+      const model = await loadModel(file);
+      
+      // Store the loaded model in sessionStorage (as a flag since we can't store the object)
+      sessionStorage.setItem('customModelUploaded', 'true');
+      sessionStorage.setItem('customModelName', file.name);
+      
+      toast({
+        title: "Model loaded",
+        description: `"${file.name}" loaded successfully!`,
+      });
+      
+      // Navigate to view the custom model
       navigate('/view/customModel');
+    } catch (error) {
+      console.error('Error loading model:', error);
+      toast({
+        title: "Error loading model",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -56,15 +90,16 @@ const Index: React.FC = () => {
             
             <div className="mt-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <label htmlFor="file-upload">
-                <Button className="gap-2" variant="outline">
+                <Button className="gap-2" variant="outline" disabled={isUploading}>
                   <Upload size={18} />
-                  Upload Custom 3D Model
+                  {isUploading ? 'Uploading...' : 'Upload Custom 3D Model'}
                   <input
                     id="file-upload"
                     type="file"
                     accept=".obj,.gltf,.glb,.stl"
                     className="hidden"
                     onChange={handleFileUpload}
+                    disabled={isUploading}
                   />
                 </Button>
               </label>

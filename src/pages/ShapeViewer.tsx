@@ -7,6 +7,7 @@ import RenderControls from '@/components/RenderControls';
 import LoadingTransition from '@/components/LoadingTransition';
 import { ShapeType, getShapeById } from '@/lib/shapes';
 import { Button } from '@/components/ui/button';
+import { lightingOptions } from '@/lib/lighting';
 
 const ShapeViewer: React.FC = () => {
   const { shapeId = 'cube' } = useParams<{ shapeId: ShapeType }>();
@@ -22,18 +23,34 @@ const ShapeViewer: React.FC = () => {
   const [renderingMode, setRenderingMode] = useState('phong');
   const [shapeColor, setShapeColor] = useState('#ffffff');
   const [background, setBackground] = useState('space');
+  
+  // Light colors
+  const [ambientLightColor, setAmbientLightColor] = useState(lightingOptions.ambientLight.defaultColor);
+  const [diffuseLightColor, setDiffuseLightColor] = useState(lightingOptions.diffuseLight.defaultColor);
+  const [specularLightColor, setSpecularLightColor] = useState(lightingOptions.specularLight.defaultColor);
+  const [showLightHelpers, setShowLightHelpers] = useState(true);
+  
+  // Custom model state
+  const [customModel, setCustomModel] = useState<THREE.Object3D | undefined>(undefined);
 
   useEffect(() => {
     try {
-      // Validate shape ID
-      getShapeById(shapeId as ShapeType);
-      
-      // Simulate loading time only on initial load
-      const timer = setTimeout(() => {
+      // Check if this is a custom model
+      if (shapeId === 'customModel') {
+        // The custom model will be loaded from state
+        // Set isLoading to false since we'll handle the model in the Scene component
         setIsLoading(false);
-      }, 800);
-      
-      return () => clearTimeout(timer);
+      } else {
+        // Validate shape ID
+        getShapeById(shapeId as ShapeType);
+        
+        // Simulate loading time only on initial load
+        const timer = setTimeout(() => {
+          setIsLoading(false);
+        }, 800);
+        
+        return () => clearTimeout(timer);
+      }
     } catch (error) {
       console.error('Invalid shape ID:', error);
       navigate('/');
@@ -76,6 +93,27 @@ const ShapeViewer: React.FC = () => {
   const handleBackgroundChange = useCallback((value: string) => {
     setBackground(value);
   }, []);
+  
+  const handleAmbientLightColorChange = useCallback((value: string) => {
+    setAmbientLightColor(value);
+  }, []);
+  
+  const handleDiffuseLightColorChange = useCallback((value: string) => {
+    setDiffuseLightColor(value);
+  }, []);
+  
+  const handleSpecularLightColorChange = useCallback((value: string) => {
+    setSpecularLightColor(value);
+  }, []);
+  
+  const handleShowLightHelpersChange = useCallback((value: boolean) => {
+    setShowLightHelpers(value);
+  }, []);
+
+  // Get the display name for the current shape
+  const shapeDisplayName = shapeId === 'customModel' 
+    ? 'Custom Model' 
+    : (shapeId && getShapeById(shapeId as ShapeType).name);
 
   return (
     <LoadingTransition isLoading={isLoading}>
@@ -91,7 +129,7 @@ const ShapeViewer: React.FC = () => {
           </Button>
           
           <h1 className="text-xl font-medium">
-            {shapeId && getShapeById(shapeId as ShapeType).name}
+            {shapeDisplayName}
           </h1>
           
           <Button 
@@ -114,6 +152,11 @@ const ShapeViewer: React.FC = () => {
             renderingMode={renderingMode}
             shapeColor={shapeColor}
             background={background}
+            ambientLightColor={ambientLightColor}
+            diffuseLightColor={diffuseLightColor}
+            specularLightColor={specularLightColor}
+            showLightHelpers={showLightHelpers}
+            customModel={customModel}
           />
         </div>
         
@@ -134,6 +177,14 @@ const ShapeViewer: React.FC = () => {
           setShapeColor={handleShapeColorChange}
           background={background}
           setBackground={handleBackgroundChange}
+          ambientLightColor={ambientLightColor}
+          setAmbientLightColor={handleAmbientLightColorChange}
+          diffuseLightColor={diffuseLightColor}
+          setDiffuseLightColor={handleDiffuseLightColorChange}
+          specularLightColor={specularLightColor}
+          setSpecularLightColor={handleSpecularLightColorChange}
+          showLightHelpers={showLightHelpers}
+          setShowLightHelpers={handleShowLightHelpersChange}
           onBack={handleGoBack}
         />
       </div>

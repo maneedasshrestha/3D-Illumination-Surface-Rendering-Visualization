@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Stars } from '@react-three/drei';
@@ -15,6 +14,11 @@ interface SceneProps {
   renderingMode: string;
   shapeColor: string;
   background: string;
+  ambientLightColor?: string;
+  diffuseLightColor?: string;
+  specularLightColor?: string;
+  showLightHelpers?: boolean;
+  customModel?: THREE.Object3D;
 }
 
 const Shape: React.FC<{ 
@@ -22,8 +26,26 @@ const Shape: React.FC<{
   wireframe: boolean;
   renderingMode: string;
   shapeColor: string;
-}> = ({ shapeId, wireframe, renderingMode, shapeColor }) => {
+  customModel?: THREE.Object3D;
+}> = ({ shapeId, wireframe, renderingMode, shapeColor, customModel }) => {
   const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  
+  if (customModel) {
+    useFrame(() => {
+      if (groupRef.current) {
+        groupRef.current.rotation.x += 0.002;
+        groupRef.current.rotation.y += 0.002;
+      }
+    });
+
+    return (
+      <group ref={groupRef} scale={[0.5, 0.5, 0.5]}>
+        <primitive object={customModel} />
+      </group>
+    );
+  }
+  
   const shape = getShapeById(shapeId);
   const geometry = useMemo(() => shape.geometry(), [shapeId]);
   
@@ -66,36 +88,128 @@ const SpaceBackground: React.FC = () => {
   );
 };
 
+const LightHelper: React.FC<{
+  position: [number, number, number];
+  color: string;
+  type: 'directional' | 'point';
+}> = ({ position, color, type }) => {
+  const size = type === 'directional' ? 1 : 0.5;
+  
+  return (
+    <group position={position}>
+      <mesh>
+        <sphereGeometry args={[size * 0.2, 16, 8]} />
+        <meshBasicMaterial color={color} />
+      </mesh>
+      {type === 'directional' && (
+        <group>
+          {[...Array(8)].map((_, i) => {
+            const angle = (i / 8) * Math.PI * 2;
+            const length = 2 + Math.random() * 2;
+            const width = 0.1;
+            
+            return (
+              <mesh key={i} position={[Math.sin(angle) * length * 0.5, Math.cos(angle) * length * 0.5, 0]}>
+                <planeGeometry args={[width, length]} />
+                <meshBasicMaterial 
+                  color={color} 
+                  transparent={true} 
+                  opacity={0.4}
+                  side={THREE.DoubleSide}
+                />
+              </mesh>
+            );
+          })}
+        </group>
+      )}
+      {type === 'point' && (
+        <group>
+          {[...Array(12)].map((_, i) => {
+            const phi = Math.acos(-1 + (2 * i) / 12);
+            const theta = Math.sqrt(12 * Math.PI) * phi;
+            const length = 1 + Math.random();
+            
+            return (
+              <mesh key={i} position={[
+                length * Math.sin(phi) * Math.cos(theta) * 0.5,
+                length * Math.sin(phi) * Math.sin(theta) * 0.5,
+                length * Math.cos(phi) * 0.5
+              ]}>
+                <boxGeometry args={[0.05, 0.05, length]} />
+                <meshBasicMaterial 
+                  color={color} 
+                  transparent={true} 
+                  opacity={0.4}
+                />
+              </mesh>
+            );
+          })}
+        </group>
+      )}
+    </group>
+  );
+};
+
 const Lights: React.FC<{ 
   ambient: boolean;
   diffuse: boolean;
   specular: boolean;
-}> = React.memo(({ ambient, diffuse, specular }) => {
+  ambientColor?: string;
+  diffuseColor?: string;
+  specularColor?: string;
+  showHelpers?: boolean;
+}> = React.memo(({ 
+  ambient, 
+  diffuse, 
+  specular, 
+  ambientColor = lightingOptions.ambientLight.defaultColor,
+  diffuseColor = lightingOptions.diffuseLight.defaultColor,
+  specularColor = lightingOptions.specularLight.defaultColor,
+  showHelpers = false
+}) => {
   return (
     <>
       {ambient && (
         <ambientLight 
-          color={new THREE.Color(lightingOptions.ambientLight.defaultColor)}
+          color={new THREE.Color(ambientColor)}
           intensity={lightingOptions.ambientLight.defaultIntensity}
         />
       )}
       
       {diffuse && (
-        <directionalLight
-          color={new THREE.Color(lightingOptions.diffuseLight.defaultColor)}
-          intensity={lightingOptions.diffuseLight.defaultIntensity}
-          position={lightingOptions.diffuseLight.defaultPosition}
-          castShadow
-        />
+        <>
+          <directionalLight
+            color={new THREE.Color(diffuseColor)}
+            intensity={lightingOptions.diffuseLight.defaultIntensity}
+            position={lightingOptions.diffuseLight.defaultPosition}
+            castShadow
+          />
+          {showHelpers && (
+            <LightHelper 
+              position={lightingOptions.diffuseLight.defaultPosition} 
+              color={diffuseColor}
+              type="directional"
+            />
+          )}
+        </>
       )}
       
       {specular && (
-        <pointLight
-          color={new THREE.Color(lightingOptions.specularLight.defaultColor)}
-          intensity={lightingOptions.specularLight.defaultIntensity}
-          position={lightingOptions.specularLight.defaultPosition}
-          castShadow
-        />
+        <>
+          <pointLight
+            color={new THREE.Color(specularColor)}
+            intensity={lightingOptions.specularLight.defaultIntensity}
+            position={lightingOptions.specularLight.defaultPosition}
+            castShadow
+          />
+          {showHelpers && (
+            <LightHelper 
+              position={lightingOptions.specularLight.defaultPosition} 
+              color={specularColor}
+              type="point"
+            />
+          )}
+        </>
       )}
     </>
   );
@@ -103,13 +217,24 @@ const Lights: React.FC<{
 
 Lights.displayName = 'Lights';
 
-// This component ensures the Canvas only mounts once
 const CanvasContainer: React.FC<SceneProps> = ({ 
-  shapeId, wireframe, ambient, diffuse, specular, renderingMode, shapeColor, background 
+  shapeId, 
+  wireframe, 
+  ambient, 
+  diffuse, 
+  specular, 
+  renderingMode, 
+  shapeColor, 
+  background,
+  ambientLightColor = lightingOptions.ambientLight.defaultColor,
+  diffuseLightColor = lightingOptions.diffuseLight.defaultColor,
+  specularLightColor = lightingOptions.specularLight.defaultColor,
+  showLightHelpers = true,
+  customModel
 }) => {
   const bgColor = useMemo(() => {
     const bgOption = backgroundOptions.find(option => option.id === background);
-    return bgOption ? bgOption.color : '#050A30';
+    return bgOption ? bgOption.color : '#000000';
   }, [background]);
 
   const showStars = background === 'space';
@@ -125,7 +250,11 @@ const CanvasContainer: React.FC<SceneProps> = ({
       <Lights 
         ambient={ambient} 
         diffuse={diffuse} 
-        specular={specular} 
+        specular={specular}
+        ambientColor={ambientLightColor}
+        diffuseColor={diffuseLightColor}
+        specularColor={specularLightColor}
+        showHelpers={showLightHelpers}
       />
       
       <Shape 
@@ -133,6 +262,7 @@ const CanvasContainer: React.FC<SceneProps> = ({
         wireframe={wireframe}
         renderingMode={renderingMode}
         shapeColor={shapeColor}
+        customModel={customModel}
       />
       
       <OrbitControls 

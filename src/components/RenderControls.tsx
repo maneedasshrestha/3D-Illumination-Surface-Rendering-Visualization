@@ -27,6 +27,14 @@ interface RenderControlsProps {
   setShapeColor: (value: string) => void;
   background: string;
   setBackground: (value: string) => void;
+  ambientLightColor: string;
+  setAmbientLightColor: (value: string) => void;
+  diffuseLightColor: string;
+  setDiffuseLightColor: (value: string) => void;
+  specularLightColor: string;
+  setSpecularLightColor: (value: string) => void;
+  showLightHelpers: boolean;
+  setShowLightHelpers: (value: boolean) => void;
   onBack: () => void;
 }
 
@@ -47,6 +55,14 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   setShapeColor,
   background,
   setBackground,
+  ambientLightColor,
+  setAmbientLightColor,
+  diffuseLightColor,
+  setDiffuseLightColor,
+  specularLightColor,
+  setSpecularLightColor,
+  showLightHelpers,
+  setShowLightHelpers,
   onBack,
 }) => {
   // Use callbacks to prevent unnecessary re-renders
@@ -61,6 +77,18 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   const handleBackgroundChange = useCallback((value: string) => {
     setBackground(value);
   }, [setBackground]);
+
+  const handleAmbientLightColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setAmbientLightColor(e.target.value);
+  }, [setAmbientLightColor]);
+
+  const handleDiffuseLightColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setDiffuseLightColor(e.target.value);
+  }, [setDiffuseLightColor]);
+
+  const handleSpecularLightColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSpecularLightColor(e.target.value);
+  }, [setSpecularLightColor]);
 
   return (
     <aside
@@ -147,6 +175,28 @@ const RenderControls: React.FC<RenderControlsProps> = ({
               />
             </div>
             
+            {ambient && (
+              <div className="space-y-2 ml-6">
+                <Label htmlFor="ambientLightColor">Color</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="ambientLightColor"
+                    type="color"
+                    value={ambientLightColor}
+                    onChange={handleAmbientLightColorChange}
+                    className="w-12 h-10 p-1"
+                  />
+                  <Input
+                    type="text"
+                    value={ambientLightColor}
+                    onChange={handleAmbientLightColorChange}
+                    className="flex-1"
+                    placeholder="#ffffff"
+                  />
+                </div>
+              </div>
+            )}
+            
             <div className="flex items-center justify-between">
               <Label htmlFor="diffuse" className="cursor-pointer">Diffuse Reflection</Label>
               <Switch
@@ -156,12 +206,65 @@ const RenderControls: React.FC<RenderControlsProps> = ({
               />
             </div>
             
+            {diffuse && (
+              <div className="space-y-2 ml-6">
+                <Label htmlFor="diffuseLightColor">Color</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="diffuseLightColor"
+                    type="color"
+                    value={diffuseLightColor}
+                    onChange={handleDiffuseLightColorChange}
+                    className="w-12 h-10 p-1"
+                  />
+                  <Input
+                    type="text"
+                    value={diffuseLightColor}
+                    onChange={handleDiffuseLightColorChange}
+                    className="flex-1"
+                    placeholder="#ffffff"
+                  />
+                </div>
+              </div>
+            )}
+            
             <div className="flex items-center justify-between">
               <Label htmlFor="specular" className="cursor-pointer">Specular Reflection</Label>
               <Switch
                 id="specular"
                 checked={specular}
                 onCheckedChange={setSpecular}
+              />
+            </div>
+            
+            {specular && (
+              <div className="space-y-2 ml-6">
+                <Label htmlFor="specularLightColor">Color</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="specularLightColor"
+                    type="color"
+                    value={specularLightColor}
+                    onChange={handleSpecularLightColorChange}
+                    className="w-12 h-10 p-1"
+                  />
+                  <Input
+                    type="text"
+                    value={specularLightColor}
+                    onChange={handleSpecularLightColorChange}
+                    className="flex-1"
+                    placeholder="#ffffff"
+                  />
+                </div>
+              </div>
+            )}
+            
+            <div className="flex items-center justify-between">
+              <Label htmlFor="showLightHelpers" className="cursor-pointer">Visible Light Sources</Label>
+              <Switch
+                id="showLightHelpers"
+                checked={showLightHelpers}
+                onCheckedChange={setShowLightHelpers}
               />
             </div>
           </div>
