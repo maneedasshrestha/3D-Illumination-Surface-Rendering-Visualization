@@ -20,7 +20,6 @@ interface SceneProps {
   specularLightColor?: string;
   showLightHelpers?: boolean;
   customModel?: THREE.Object3D | null;
-  textureImage?: string | null;
 }
 
 const Shape: React.FC<{ 
@@ -29,44 +28,9 @@ const Shape: React.FC<{
   renderingMode: string;
   shapeColor: string;
   customModel?: THREE.Object3D | null;
-  textureImage?: string | null;
-}> = ({ shapeId, wireframe, renderingMode, shapeColor, customModel, textureImage }) => {
+}> = ({ shapeId, wireframe, renderingMode, shapeColor, customModel }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const [texture, setTexture] = useState<THREE.Texture | null>(null);
-  
-  // Load texture if provided
-  useEffect(() => {
-    if (!textureImage) {
-      setTexture(null);
-      return;
-    }
-    
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(
-      textureImage,
-      (loadedTexture) => {
-        loadedTexture.wrapS = THREE.RepeatWrapping;
-        loadedTexture.wrapT = THREE.RepeatWrapping;
-        loadedTexture.repeat.set(1, 1);
-        setTexture(loadedTexture);
-        console.log('Texture loaded successfully');
-      },
-      (xhr) => {
-        console.log((xhr.loaded / xhr.total * 100) + '% texture loaded');
-      },
-      (error) => {
-        console.error('Error loading texture:', error);
-        setTexture(null);
-      }
-    );
-    
-    return () => {
-      if (texture) {
-        texture.dispose();
-      }
-    };
-  }, [textureImage]);
   
   // Handle custom model if provided
   if (shapeId === 'customModel' && customModel) {
@@ -76,11 +40,7 @@ const Shape: React.FC<{
     useEffect(() => {
       if (!customModel) return;
       
-      const material = createMaterial(
-        wireframe ? 'wireframe' : renderingMode, 
-        shapeColor,
-        texture
-      );
+      const material = createMaterial(wireframe ? 'wireframe' : renderingMode, shapeColor);
       
       customModel.traverse((child) => {
         if (child instanceof THREE.Mesh) {
@@ -102,7 +62,7 @@ const Shape: React.FC<{
           }
         });
       };
-    }, [customModel, wireframe, renderingMode, shapeColor, texture]);
+    }, [customModel, wireframe, renderingMode, shapeColor]);
     
     useFrame(() => {
       if (groupRef.current) {
@@ -142,10 +102,7 @@ const Shape: React.FC<{
   const geometry = useMemo(() => shape.geometry(), [shapeId]);
   
   const effectiveRenderMode = wireframe ? 'wireframe' : renderingMode;
-  const material = useMemo(() => 
-    createMaterial(effectiveRenderMode, shapeColor, texture), 
-    [effectiveRenderMode, shapeColor, texture]
-  );
+  const material = useMemo(() => createMaterial(effectiveRenderMode, shapeColor), [effectiveRenderMode, shapeColor]);
 
   useFrame(() => {
     if (meshRef.current) {
@@ -325,8 +282,7 @@ const CanvasContainer: React.FC<SceneProps> = ({
   diffuseLightColor = lightingOptions.diffuseLight.defaultColor,
   specularLightColor = lightingOptions.specularLight.defaultColor,
   showLightHelpers = true,
-  customModel,
-  textureImage
+  customModel
 }) => {
   const bgColor = useMemo(() => {
     const bgOption = backgroundOptions.find(option => option.id === background);
@@ -349,7 +305,7 @@ const CanvasContainer: React.FC<SceneProps> = ({
         specular={specular}
         ambientColor={ambientLightColor}
         diffuseColor={diffuseLightColor}
-        specularColor={specularColor}
+        specularColor={specularLightColor}
         showHelpers={showLightHelpers}
       />
       
@@ -359,7 +315,6 @@ const CanvasContainer: React.FC<SceneProps> = ({
         renderingMode={renderingMode}
         shapeColor={shapeColor}
         customModel={customModel}
-        textureImage={textureImage}
       />
       
       <OrbitControls 

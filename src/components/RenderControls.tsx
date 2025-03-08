@@ -1,6 +1,6 @@
 
-import React, { useCallback, useRef } from 'react';
-import { X, Image, Trash2 } from 'lucide-react';
+import React, { useCallback } from 'react';
+import { X } from 'lucide-react';
 import { renderingOptions, backgroundOptions, lightingPresets } from '@/lib/lighting';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -31,9 +31,6 @@ interface RenderControlsProps {
   setLightingPreset: (value: string) => void;
   showLightHelpers: boolean;
   setShowLightHelpers: (value: boolean) => void;
-  onTextureUpload?: (file: File | null) => void;
-  onTextureClear?: () => void;
-  hasTexture?: boolean;
   onBack: () => void;
 }
 
@@ -58,13 +55,8 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   setLightingPreset,
   showLightHelpers,
   setShowLightHelpers,
-  onTextureUpload,
-  onTextureClear,
-  hasTexture = false,
   onBack,
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
   // Use callbacks to prevent unnecessary re-renders
   const handleRenderingModeChange = useCallback((value: string) => {
     setRenderingMode(value);
@@ -81,24 +73,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   const handleLightingPresetChange = useCallback((value: string) => {
     setLightingPreset(value);
   }, [setLightingPreset]);
-  
-  const handleTextureButtonClick = useCallback(() => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  }, []);
-  
-  const handleTextureChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    if (onTextureUpload) {
-      onTextureUpload(file);
-    }
-    
-    // Reset the input to allow selecting the same file again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  }, [onTextureUpload]);
 
   return (
     <aside
@@ -145,43 +119,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
                 placeholder="#ffffff"
               />
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="texture">Texture</Label>
-            <div className="flex items-center gap-2">
-              <Button 
-                onClick={handleTextureButtonClick}
-                variant="outline"
-                className="flex-1 gap-2"
-              >
-                <Image size={16} />
-                {hasTexture ? 'Change Texture' : 'Add Texture'}
-              </Button>
-              
-              {hasTexture && (
-                <Button 
-                  onClick={onTextureClear}
-                  variant="outline"
-                  size="icon"
-                  className="flex-shrink-0"
-                >
-                  <Trash2 size={16} />
-                </Button>
-              )}
-              
-              <input
-                ref={fileInputRef}
-                id="texture-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleTextureChange}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {hasTexture ? 'Texture applied to shape' : 'Upload an image to wrap around the shape'}
-            </p>
           </div>
           
           <div className="space-y-2">

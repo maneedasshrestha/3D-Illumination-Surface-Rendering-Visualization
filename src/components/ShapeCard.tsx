@@ -120,7 +120,7 @@ const ShapeCard: React.FC<ShapeCardProps> = ({ shape, index }) => {
         <div className="relative h-48 w-full overflow-hidden bg-black">
           <canvas ref={canvasRef} className="h-full w-full" />
         </div>
-        <CardContent className="p-4 bg-white">
+        <CardContent className="p-4">
           <h3 className="text-lg font-medium text-foreground">
             {shape.name}
           </h3>

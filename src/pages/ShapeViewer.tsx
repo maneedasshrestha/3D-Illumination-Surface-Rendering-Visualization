@@ -8,7 +8,7 @@ import LoadingTransition from '@/components/LoadingTransition';
 import { ShapeType, getShapeById } from '@/lib/shapes';
 import { Button } from '@/components/ui/button';
 import { lightingOptions, lightingPresets } from '@/lib/lighting';
-import { loadModel, loadTexture } from '@/lib/modelLoader';
+import { loadModel } from '@/lib/modelLoader';
 import { useToast } from '@/hooks/use-toast';
 
 const ShapeViewer: React.FC = () => {
@@ -37,9 +37,6 @@ const ShapeViewer: React.FC = () => {
   // Custom model state
   const [customModel, setCustomModel] = useState<THREE.Object3D | null>(null);
   const [customModelLoading, setCustomModelLoading] = useState(false);
-  
-  // Texture state
-  const [textureImage, setTextureImage] = useState<string | null>(null);
 
   // Update light colors when preset changes
   useEffect(() => {
@@ -165,40 +162,6 @@ const ShapeViewer: React.FC = () => {
   const handleShowLightHelpersChange = useCallback((value: boolean) => {
     setShowLightHelpers(value);
   }, []);
-  
-  const handleTextureUpload = useCallback(async (file: File | null) => {
-    if (!file) {
-      setTextureImage(null);
-      return;
-    }
-    
-    try {
-      const textureURL = await loadTexture(file);
-      setTextureImage(textureURL);
-      toast({
-        title: "Texture applied",
-        description: `"${file.name}" applied successfully!`,
-      });
-    } catch (error) {
-      console.error('Error loading texture:', error);
-      toast({
-        title: "Error loading texture",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
-  
-  const clearTexture = useCallback(() => {
-    if (textureImage) {
-      URL.revokeObjectURL(textureImage);
-      setTextureImage(null);
-      toast({
-        title: "Texture removed",
-        description: "Texture has been removed from the shape",
-      });
-    }
-  }, [textureImage, toast]);
 
   // Get the display name for the current shape
   const shapeDisplayName = shapeId === 'customModel' 
@@ -221,7 +184,7 @@ const ShapeViewer: React.FC = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <h1 className="text-xl font-medium bg-white/80 px-4 py-1 rounded-full">
+          <h1 className="text-xl font-medium">
             {shapeDisplayName}
           </h1>
           
@@ -251,7 +214,6 @@ const ShapeViewer: React.FC = () => {
               specularLightColor={specularLightColor}
               showLightHelpers={showLightHelpers}
               customModel={customModel}
-              textureImage={textureImage}
             />
           )}
         </div>
@@ -277,9 +239,6 @@ const ShapeViewer: React.FC = () => {
           setLightingPreset={handleLightingPresetChange}
           showLightHelpers={showLightHelpers}
           setShowLightHelpers={handleShowLightHelpersChange}
-          onTextureUpload={handleTextureUpload}
-          onTextureClear={clearTexture}
-          hasTexture={!!textureImage}
           onBack={handleGoBack}
         />
       </div>
