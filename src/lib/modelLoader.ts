@@ -84,3 +84,20 @@ export function loadModel(file: File): Promise<THREE.Object3D> {
     }
   });
 }
+
+// Function to load a texture from a file
+export function loadTexture(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('Unsupported file format. Please upload an image file.'));
+      return;
+    }
+    
+    try {
+      const fileURL = URL.createObjectURL(file);
+      resolve(fileURL);
+    } catch (error) {
+      reject(new Error('Error creating URL for texture image'));
+    }
+  });
+}
