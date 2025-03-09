@@ -5,6 +5,7 @@ import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useSpring, animated } from '@react-spring/three';
+import { Stars } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Animated particles component for the 3D background
@@ -42,13 +43,14 @@ const Particles = () => {
   return (
     <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
       <sphereGeometry args={[0.05, 8, 8]} />
-      <meshBasicMaterial color="#8B5CF6" transparent opacity={0.6} />
+      <meshBasicMaterial color="#FFFFFF" transparent opacity={0.6} />
     </instancedMesh>
   );
 };
 
 // Animated title component
 const AnimatedTitle = () => {
+  const meshRef = useRef<THREE.Mesh>(null);
   const [springs, api] = useSpring(() => ({
     scale: [0, 0, 0],
     rotation: [0, 0, 0],
@@ -62,14 +64,18 @@ const AnimatedTitle = () => {
     });
   }, [api]);
 
+  // Fix the TypeScript error by converting the rotation spring to an array of numbers
+  const rotationArray = springs.rotation.to((x, y, z) => [x, y, z]);
+
   return (
     <animated.mesh
+      ref={meshRef}
       scale={springs.scale}
-      rotation={springs.rotation as any}
+      rotation={rotationArray as any}
       position={[0, 0, -5]}
     >
       <torusKnotGeometry args={[1, 0.3, 100, 16]} />
-      <meshPhongMaterial color="#D946EF" />
+      <meshPhongMaterial color="#FFFFFF" />
     </animated.mesh>
   );
 };
@@ -80,6 +86,7 @@ const Scene = () => {
     <>
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 10]} intensity={1} />
+      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
       <Particles />
       <AnimatedTitle />
     </>
@@ -94,12 +101,12 @@ const Welcome: React.FC = () => {
   const handleGetStarted = () => {
     setIsExiting(true);
     setTimeout(() => {
-      navigate('/');
+      navigate('/explore');
     }, 800); // Delay navigation to allow for exit animation
   };
 
   return (
-    <div className={`fixed inset-0 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-purple-950 
+    <div className={`fixed inset-0 bg-black 
                      ${isExiting ? 'animate-fade-out' : 'animate-fade-in'}`}>
       <div className="absolute inset-0 z-0">
         <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
@@ -110,18 +117,18 @@ const Welcome: React.FC = () => {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 text-center">
         <div className={`space-y-6 max-w-3xl ${isExiting ? 'animate-fade-out' : 'animate-fade-in'}`} 
              style={{ animationDelay: '0.2s' }}>
-          <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400">
+          <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
             Surface Illumination Explorer
           </h1>
           
-          <p className="mt-6 text-xl text-slate-700 dark:text-slate-300 max-w-2xl mx-auto">
+          <p className="mt-6 text-xl text-gray-300 max-w-2xl mx-auto">
             Discover the fascinating world of 3D rendering techniques and surface illumination models through interactive visualizations.
           </p>
           
           <div className="mt-10">
             <Button 
               onClick={handleGetStarted}
-              className="px-8 py-6 text-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 group"
+              className="px-8 py-6 text-lg bg-white hover:bg-gray-200 text-black shadow-lg hover:shadow-xl transition-all duration-300 group"
             >
               <span>Get Started</span>
               <Sparkles className="ml-2 w-5 h-5 group-hover:animate-pulse" />
