@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Upload } from 'lucide-react';
 import ShapeGrid from '@/components/ShapeGrid';
 import LoadingTransition from '@/components/LoadingTransition';
+import InteractiveBackground from '@/components/InteractiveBackground';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -79,7 +80,8 @@ const Index: React.FC = () => {
 
   return (
     <LoadingTransition isLoading={isLoading}>
-      <div className="min-h-screen bg-background text-foreground px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <InteractiveBackground />
+      <div className="min-h-screen bg-background/80 backdrop-blur-sm text-foreground px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div className="inline-block animate-fade-in">
