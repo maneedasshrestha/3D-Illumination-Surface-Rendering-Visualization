@@ -64,14 +64,12 @@ const AnimatedTitle = () => {
     });
   }, [api]);
 
-  // Fix the TypeScript error by converting the rotation spring to an array of numbers
-  const rotationArray = springs.rotation.to((x, y, z) => [x, y, z]);
-
   return (
     <animated.mesh
       ref={meshRef}
       scale={springs.scale}
-      rotation={rotationArray as any}
+      // Fix the TypeScript error by explicitly defining the rotation type
+      rotation={springs.rotation.to((x, y, z) => [x, y, z]) as unknown as [number, number, number]}
       position={[0, 0, -5]}
     >
       <torusKnotGeometry args={[1, 0.3, 100, 16]} />
