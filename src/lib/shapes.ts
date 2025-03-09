@@ -12,7 +12,6 @@ export type ShapeType =
   | 'dodecahedron' 
   | 'icosahedron'
   | 'torusKnot'
-  | 'heart'
   | 'trefoil'
   | 'spiral'
   | 'customModel';
@@ -103,35 +102,6 @@ export const shapes: ShapeDefinition[] = [
     id: 'torusKnot',
     name: 'Torus Knot',
     geometry: () => new THREE.TorusKnotGeometry(0.5, 0.15, 100, 16),
-    defaultPosition: [0, 0, 0],
-    defaultRotation: [0, 0, 0],
-    defaultScale: [1, 1, 1],
-  },
-  {
-    id: 'heart',
-    name: 'Heart',
-    geometry: () => {
-      // Create a heart shape
-      const heartShape = new THREE.Shape();
-      const x = 0, y = 0;
-      
-      heartShape.moveTo(x, y + 0.25);
-      heartShape.bezierCurveTo(x, y + 0.25, x - 0.25, y, x - 0.25, y);
-      heartShape.bezierCurveTo(x - 0.25, y - 0.25, x, y - 0.25, x, y - 0.25);
-      heartShape.bezierCurveTo(x + 0.25, y - 0.25, x + 0.25, y, x + 0.25, y);
-      heartShape.bezierCurveTo(x + 0.25, y + 0.25, x, y + 0.25, x, y + 0.25);
-      
-      const extrudeSettings = {
-        depth: 0.2,
-        bevelEnabled: true,
-        bevelSegments: 2,
-        steps: 2,
-        bevelSize: 0.1,
-        bevelThickness: 0.1
-      };
-      
-      return new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
-    },
     defaultPosition: [0, 0, 0],
     defaultRotation: [0, 0, 0],
     defaultScale: [1, 1, 1],
