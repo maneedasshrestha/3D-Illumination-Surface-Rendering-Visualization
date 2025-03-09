@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
@@ -68,8 +67,7 @@ const AnimatedTitle = () => {
     <animated.mesh
       ref={meshRef}
       scale={springs.scale}
-      // Fix the TypeScript error by explicitly defining the rotation type
-      rotation={springs.rotation.to((x, y, z) => [x, y, z]) as unknown as [number, number, number]}
+      rotation={springs.rotation}
       position={[0, 0, -5]}
     >
       <torusKnotGeometry args={[1, 0.3, 100, 16]} />
