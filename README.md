@@ -1,11 +1,8 @@
-
 # 3D Illumination & Surface Rendering Visualization
-
-![Project Preview](public/og-image.png)
 
 ## Project Overview
 
-This project is an interactive web application that demonstrates 3D illumination and surface rendering techniques using **Three.js** and **React Three Fiber**. It provides an educational platform for users to explore different lighting models and rendering methods applied to various 3D shapes.
+This project aims to simplify the understanding of illumination and surface rendering methods using **Three.js**. The web application provides an interactive 3D environment where users can explore different rendering techniques on various 3D shapes.
 
 ## Live Demo
 
@@ -13,122 +10,57 @@ The project is live at: [Illumination & Surface Rendering](https://illumination-
 
 ## Features
 
-- **Interactive 3D Shape Gallery:** Choose from a variety of pre-configured 3D shapes
-- **Custom Model Upload:** Upload your own 3D models in OBJ, GLTF, GLB, or STL formats
-- **Texture Mapping:** Apply custom image textures to 3D objects
-- **Comprehensive Lighting Controls:**
-  - Toggle ambient, diffuse, and specular reflection independently
-  - Preset lighting configurations (White, Warm, Cool, Dramatic, Sunset, Disco)
-  - Visual light source indicators
-- **Rendering Techniques:** Switch between different shading models:
-  - Constant (Flat) Shading
-  - Gouraud Shading
-  - Phong Shading
-  - Optimized Fast Phong
-  - Wireframe visualization
-- **Environment Options:** Multiple background settings with interactive space environment
-- **Responsive Design:** Works on both desktop and mobile devices
-- **Intuitive UI:** Clean, modern interface with real-time controls
+- **Shape Selection Grid:** Choose from a variety of 3D shapes displayed in a grid layout.
+- **Seamless Transition:** Upon selecting a shape, it smoothly transitions into an interactive 3D canvas.
+- **Customizable Rendering:** Side panel toggles allow users to adjust rendering settings:
+  - Toggle mesh visibility
+  - Enable/disable ambient reflection
+  - Enable/disable diffuse reflection
+  - Enable/disable specular reflection
+- **Interactive Controls:** The selected shape responds to mouse movements, enhancing the visualization experience.
+- **Modern & Mobile-Friendly UI:** The interface is designed with a sleek, responsive layout, making it usable across various devices.
 
 ## Technologies Used
 
-- **Three.js** - Industry-standard 3D graphics library for the web
-- **React Three Fiber** - React renderer for Three.js
-- **React Three Drei** - Useful helpers for React Three Fiber
-- **React** - Front-end UI framework
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS** - Utility-first CSS framework
-- **shadcn-ui** - High-quality React components
-- **React Router** - For navigation between views
-- **Vite** - Next-generation frontend build tool
+- **Three.js** - For rendering 3D graphics
+- **React** - For building a responsive and interactive UI
+- **TypeScript** - For type safety and maintainability
+- **shadcn-ui** - For UI components
+- **Tailwind CSS** - For styling and responsiveness
 
-## How to Install & Run Locally
+## How to Run Locally
 
-### Prerequisites
+Ensure you have **Node.js** and **npm** installed. Follow these steps:
 
-- Node.js 16.x or later
-- npm 7.x or later (or yarn/pnpm)
+```sh
+# Clone the repository
+git clone <YOUR_GIT_URL>
 
-### Installation Steps
+# Navigate to the project directory
+cd <YOUR_PROJECT_NAME>
 
-1. **Clone the repository**
-
-```bash
-git clone https://github.com/yourusername/illumination-surface-rendering.git
-cd illumination-surface-rendering
-```
-
-2. **Install dependencies**
-
-```bash
+# Install dependencies
 npm install
-# or
-yarn install
-# or
-pnpm install
-```
 
-3. **Start the development server**
-
-```bash
+# Start the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-4. **Open your browser**
+This will launch the project on a local development server with hot reloading.
 
-The application will be available at `http://localhost:5173` (or the port shown in your terminal).
+## Contribution
 
-## Project Structure
+If you'd like to contribute:
 
-```
-illumination-surface-rendering/
-├── public/               # Static files
-├── src/
-│   ├── components/       # React components
-│   ├── hooks/            # Custom React hooks
-│   ├── lib/              # Utility functions and configurations
-│   ├── pages/            # Page components
-│   ├── App.tsx           # Root component
-│   └── main.tsx          # Application entry point
-├── index.html            # HTML template
-├── package.json          # Project dependencies
-├── tsconfig.json         # TypeScript configuration
-└── README.md             # Project documentation
-```
-
-## Key Components
-
-- **ShapeViewer**: Main component for 3D shape visualization
-- **Scene**: Three.js scene setup and rendering
-- **RenderControls**: UI controls for adjusting rendering parameters
-- **ShapeGrid**: Gallery of available 3D shapes
-- **InteractiveBackground**: Animated 3D background for the home page
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-name`).
+3. Make your changes and commit (`git commit -m 'Add new feature'`).
+4. Push to your branch (`git push origin feature-name`).
+5. Open a Pull Request.
 
 ## License
 
-This project is open-source and available under the MIT License.
-
-## Acknowledgments
-
-- Three.js for providing an excellent 3D graphics library
-- React Three Fiber for simplifying Three.js integration with React
-- shadcn-ui for beautiful and accessible UI components
-- All contributors who have helped improve this project
+This project is open-source and available under the **MIT License**.
 
 ---
 
-Made with ❤️ for 3D graphics enthusiasts and learners
