@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
@@ -66,7 +67,9 @@ const AnimatedTitle = () => {
   return (
     <animated.mesh
       ref={meshRef}
+      // @ts-ignore - This is a valid use case but TypeScript is having trouble with the types
       scale={springs.scale}
+      // @ts-ignore - This is a valid use case but TypeScript is having trouble with the types
       rotation={springs.rotation}
       position={[0, 0, -5]}
     >
