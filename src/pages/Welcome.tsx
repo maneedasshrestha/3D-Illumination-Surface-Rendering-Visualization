@@ -1,0 +1,136 @@
+
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useSpring, animated } from '@react-spring/three';
+import * as THREE from 'three';
+
+// Animated particles component for the 3D background
+const Particles = () => {
+  const count = 1000;
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  const [dummy] = useState(() => new THREE.Object3D());
+
+  useFrame(() => {
+    if (!mesh.current) return;
+    
+    // Animate particles in a gentle wave pattern
+    for (let i = 0; i < count; i++) {
+      const id = i;
+      const time = Date.now() * 0.001;
+      
+      // Position
+      const x = Math.sin(id + time * 0.1) * 15;
+      const y = Math.cos(id + time * 0.2) * 15;
+      const z = Math.sin(id * 2 + time * 0.05) * 5;
+      
+      dummy.position.set(x, y, z);
+      
+      // Scale
+      const scale = 0.02 + Math.sin(id + time * 0.3) * 0.01;
+      dummy.scale.set(scale, scale, scale);
+      
+      dummy.updateMatrix();
+      mesh.current.setMatrixAt(id, dummy.matrix);
+    }
+    
+    mesh.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
+      <sphereGeometry args={[0.05, 8, 8]} />
+      <meshBasicMaterial color="#8B5CF6" transparent opacity={0.6} />
+    </instancedMesh>
+  );
+};
+
+// Animated title component
+const AnimatedTitle = () => {
+  const [springs, api] = useSpring(() => ({
+    scale: [0, 0, 0],
+    rotation: [0, 0, 0],
+    config: { mass: 5, tension: 400, friction: 50 }
+  }));
+
+  useEffect(() => {
+    api.start({
+      scale: [1, 1, 1],
+      rotation: [0, Math.PI * 2, 0],
+    });
+  }, [api]);
+
+  return (
+    <animated.mesh
+      scale={springs.scale}
+      rotation={springs.rotation as any}
+      position={[0, 0, -5]}
+    >
+      <torusKnotGeometry args={[1, 0.3, 100, 16]} />
+      <meshPhongMaterial color="#D946EF" />
+    </animated.mesh>
+  );
+};
+
+// Scene that contains all 3D elements
+const Scene = () => {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 10]} intensity={1} />
+      <Particles />
+      <AnimatedTitle />
+    </>
+  );
+};
+
+// Main welcome page component
+const Welcome: React.FC = () => {
+  const navigate = useNavigate();
+  const [isExiting, setIsExiting] = useState(false);
+  
+  const handleGetStarted = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      navigate('/');
+    }, 800); // Delay navigation to allow for exit animation
+  };
+
+  return (
+    <div className={`fixed inset-0 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-purple-950 
+                     ${isExiting ? 'animate-fade-out' : 'animate-fade-in'}`}>
+      <div className="absolute inset-0 z-0">
+        <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
+          <Scene />
+        </Canvas>
+      </div>
+      
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 text-center">
+        <div className={`space-y-6 max-w-3xl ${isExiting ? 'animate-fade-out' : 'animate-fade-in'}`} 
+             style={{ animationDelay: '0.2s' }}>
+          <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400">
+            Surface Illumination Explorer
+          </h1>
+          
+          <p className="mt-6 text-xl text-slate-700 dark:text-slate-300 max-w-2xl mx-auto">
+            Discover the fascinating world of 3D rendering techniques and surface illumination models through interactive visualizations.
+          </p>
+          
+          <div className="mt-10">
+            <Button 
+              onClick={handleGetStarted}
+              className="px-8 py-6 text-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 group"
+            >
+              <span>Get Started</span>
+              <Sparkles className="ml-2 w-5 h-5 group-hover:animate-pulse" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Welcome;
