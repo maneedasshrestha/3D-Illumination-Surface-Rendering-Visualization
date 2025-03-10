@@ -5,6 +5,7 @@ import { OrbitControls, PerspectiveCamera, Environment, Stars } from '@react-thr
 import * as THREE from 'three';
 import { ShapeType, getShapeById } from '@/lib/shapes';
 import { createMaterial, lightingOptions, backgroundOptions } from '@/lib/lighting';
+import { getBuiltinTextureUrl } from '@/lib/textures';
 
 interface SceneProps {
   shapeId: ShapeType;
@@ -20,6 +21,8 @@ interface SceneProps {
   specularLightColor?: string;
   showLightHelpers?: boolean;
   customModel?: THREE.Object3D | null;
+  textureOption?: string;
+  customTextureUrl?: string | null;
 }
 
 const Shape: React.FC<{ 
@@ -28,9 +31,29 @@ const Shape: React.FC<{
   renderingMode: string;
   shapeColor: string;
   customModel?: THREE.Object3D | null;
-}> = ({ shapeId, wireframe, renderingMode, shapeColor, customModel }) => {
+  textureOption?: string;
+  customTextureUrl?: string | null;
+}> = ({ 
+  shapeId, 
+  wireframe, 
+  renderingMode, 
+  shapeColor, 
+  customModel,
+  textureOption = 'none',
+  customTextureUrl = null
+}) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
+  
+  // Determine which texture to use
+  const textureUrl = useMemo(() => {
+    if (textureOption === 'custom' && customTextureUrl) {
+      return customTextureUrl;
+    } else if (textureOption !== 'none') {
+      return getBuiltinTextureUrl(textureOption);
+    }
+    return null;
+  }, [textureOption, customTextureUrl]);
   
   // Handle custom model if provided
   if (shapeId === 'customModel' && customModel) {
@@ -40,7 +63,11 @@ const Shape: React.FC<{
     useEffect(() => {
       if (!customModel) return;
       
-      const material = createMaterial(wireframe ? 'wireframe' : renderingMode, shapeColor);
+      const material = createMaterial(
+        wireframe ? 'wireframe' : renderingMode, 
+        shapeColor,
+        textureUrl
+      );
       
       customModel.traverse((child) => {
         if (child instanceof THREE.Mesh) {
@@ -62,7 +89,7 @@ const Shape: React.FC<{
           }
         });
       };
-    }, [customModel, wireframe, renderingMode, shapeColor]);
+    }, [customModel, wireframe, renderingMode, shapeColor, textureUrl]);
     
     useFrame(() => {
       if (groupRef.current) {
@@ -102,7 +129,10 @@ const Shape: React.FC<{
   const geometry = useMemo(() => shape.geometry(), [shapeId]);
   
   const effectiveRenderMode = wireframe ? 'wireframe' : renderingMode;
-  const material = useMemo(() => createMaterial(effectiveRenderMode, shapeColor), [effectiveRenderMode, shapeColor]);
+  const material = useMemo(() => 
+    createMaterial(effectiveRenderMode, shapeColor, textureUrl), 
+    [effectiveRenderMode, shapeColor, textureUrl]
+  );
 
   useFrame(() => {
     if (meshRef.current) {
@@ -282,7 +312,9 @@ const CanvasContainer: React.FC<SceneProps> = ({
   diffuseLightColor = lightingOptions.diffuseLight.defaultColor,
   specularLightColor = lightingOptions.specularLight.defaultColor,
   showLightHelpers = true,
-  customModel
+  customModel,
+  textureOption = 'none',
+  customTextureUrl = null
 }) => {
   const bgColor = useMemo(() => {
     const bgOption = backgroundOptions.find(option => option.id === background);
@@ -315,6 +347,8 @@ const CanvasContainer: React.FC<SceneProps> = ({
         renderingMode={renderingMode}
         shapeColor={shapeColor}
         customModel={customModel}
+        textureOption={textureOption}
+        customTextureUrl={customTextureUrl}
       />
       
       <OrbitControls 

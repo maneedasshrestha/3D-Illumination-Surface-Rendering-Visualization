@@ -9,6 +9,7 @@ import { ShapeType, getShapeById } from '@/lib/shapes';
 import { Button } from '@/components/ui/button';
 import { lightingOptions, lightingPresets } from '@/lib/lighting';
 import { loadModel } from '@/lib/modelLoader';
+import { createTextureFromFile } from '@/lib/textures';
 import { useToast } from '@/hooks/use-toast';
 
 const ShapeViewer: React.FC = () => {
@@ -26,6 +27,10 @@ const ShapeViewer: React.FC = () => {
   const [renderingMode, setRenderingMode] = useState('phong');
   const [shapeColor, setShapeColor] = useState('#ffffff');
   const [background, setBackground] = useState('space');
+  
+  // Texture states
+  const [textureOption, setTextureOption] = useState('none');
+  const [customTextureUrl, setCustomTextureUrl] = useState<string | null>(null);
   
   // Light presets and individual light colors
   const [lightingPreset, setLightingPreset] = useState('default');
@@ -162,6 +167,25 @@ const ShapeViewer: React.FC = () => {
   const handleShowLightHelpersChange = useCallback((value: boolean) => {
     setShowLightHelpers(value);
   }, []);
+  
+  const handleTextureOptionChange = useCallback((value: string) => {
+    setTextureOption(value);
+  }, []);
+  
+  const handleTextureUpload = useCallback(async (file: File) => {
+    try {
+      const textureUrl = await createTextureFromFile(file);
+      setCustomTextureUrl(textureUrl);
+      setTextureOption('custom');
+    } catch (error) {
+      console.error('Error uploading texture:', error);
+      toast({
+        title: "Error uploading texture",
+        description: "Failed to process the texture image",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
   // Get the display name for the current shape
   const shapeDisplayName = shapeId === 'customModel' 
@@ -214,6 +238,8 @@ const ShapeViewer: React.FC = () => {
               specularLightColor={specularLightColor}
               showLightHelpers={showLightHelpers}
               customModel={customModel}
+              textureOption={textureOption}
+              customTextureUrl={customTextureUrl}
             />
           )}
         </div>
@@ -239,6 +265,9 @@ const ShapeViewer: React.FC = () => {
           setLightingPreset={handleLightingPresetChange}
           showLightHelpers={showLightHelpers}
           setShowLightHelpers={handleShowLightHelpersChange}
+          textureOption={textureOption}
+          setTextureOption={handleTextureOptionChange}
+          onTextureUpload={handleTextureUpload}
           onBack={handleGoBack}
         />
       </div>

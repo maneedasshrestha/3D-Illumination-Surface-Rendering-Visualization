@@ -1,217 +1,164 @@
-
 import * as THREE from 'three';
 
-export interface LightingOption {
-  id: string;
-  name: string;
-  description: string;
-  create: (color: string, intensity: number, visible: boolean) => THREE.Light;
-  defaultPosition: [number, number, number];
-  defaultIntensity: number;
-  defaultColor: string;
-  visibleHelper?: boolean;
-}
-
-export const lightingOptions: Record<string, LightingOption> = {
+// Lighting options
+export const lightingOptions = {
   ambientLight: {
-    id: 'ambientLight',
-    name: 'Ambient Light',
-    description: 'Illuminates all objects equally without casting shadows',
-    create: (color: string, intensity: number) => new THREE.AmbientLight(color, intensity),
-    defaultPosition: [0, 0, 0],
+    defaultColor: '#404040',
     defaultIntensity: 0.5,
-    defaultColor: '#ffffff',
   },
   diffuseLight: {
-    id: 'diffuseLight',
-    name: 'Diffuse Light',
-    description: 'Scattered light that creates soft shadows',
-    create: (color: string, intensity: number, visible: boolean) => {
-      const light = new THREE.DirectionalLight(color, intensity);
-      light.castShadow = true;
-      light.shadow.mapSize.width = 1024;
-      light.shadow.mapSize.height = 1024;
-      return light;
-    },
-    defaultPosition: [5, 5, 5],
-    defaultIntensity: 0.8,
     defaultColor: '#ffffff',
-    visibleHelper: true,
+    defaultIntensity: 0.5,
+    defaultPosition: [1, 1, 1],
   },
   specularLight: {
-    id: 'specularLight',
-    name: 'Specular Light',
-    description: 'Creates bright highlights on shiny surfaces',
-    create: (color: string, intensity: number, visible: boolean) => {
-      const light = new THREE.PointLight(color, intensity);
-      light.castShadow = true;
-      return light;
-    },
-    defaultPosition: [2, 2, 2],
-    defaultIntensity: 1,
     defaultColor: '#ffffff',
-    visibleHelper: true,
-  }
+    defaultIntensity: 0.3,
+    defaultPosition: [-1, -1, -1],
+  },
 };
 
-export interface LightingPreset {
-  id: string;
-  name: string;
-  description: string;
-  ambientColor: string;
-  diffuseColor: string;
-  specularColor: string;
-}
-
-export const lightingPresets: LightingPreset[] = [
+// Update rendering options to include Gouraud shading with visible mach bands
+export const renderingOptions = [
   {
-    id: 'default',
-    name: 'White (Default)',
-    description: 'Standard white lighting for clear visibility',
-    ambientColor: '#ffffff',
-    diffuseColor: '#ffffff',
-    specularColor: '#ffffff'
-  },
-  {
-    id: 'warm',
-    name: 'Warm',
-    description: 'Warm yellow-orange lighting for a cozy feel',
-    ambientColor: '#fff5e0',
-    diffuseColor: '#ffcc80',
-    specularColor: '#ffa726'
-  },
-  {
-    id: 'cool',
-    name: 'Cool',
-    description: 'Cool blue lighting for a modern look',
-    ambientColor: '#e0f7ff',
-    diffuseColor: '#80d8ff',
-    specularColor: '#40c4ff'
-  },
-  {
-    id: 'dramatic',
-    name: 'Dramatic',
-    description: 'High contrast lighting for dramatic effect',
-    ambientColor: '#202020',
-    diffuseColor: '#ffffff',
-    specularColor: '#ffffff'
-  },
-  {
-    id: 'sunset',
-    name: 'Sunset',
-    description: 'Orange and purple tones like a sunset',
-    ambientColor: '#381c2a',
-    diffuseColor: '#ff7e5f',
-    specularColor: '#feb47b'
-  },
-  {
-    id: 'disco',
-    name: 'Disco',
-    description: 'Colorful lighting for a fun atmosphere',
-    ambientColor: '#9c27b0',
-    diffuseColor: '#00e676',
-    specularColor: '#ff1744'
-  }
-];
-
-export interface RenderingOption {
-  id: string;
-  name: string;
-  description: string;
-}
-
-export const renderingOptions: RenderingOption[] = [
-  {
-    id: 'constant',
-    name: 'Constant',
-    description: 'Flat shading with no lighting calculations',
-  },
-  {
-    id: 'gouraud',
-    name: 'Gouraud',
-    description: 'Smooth shading with per-vertex lighting calculations',
+    id: 'flat',
+    name: 'Flat Shading',
+    description: 'Renders each polygon with a single color, creating a faceted look.',
   },
   {
     id: 'phong',
-    name: 'Phong',
-    description: 'Advanced shading with per-pixel lighting calculations',
+    name: 'Phong Shading',
+    description: 'Smooth shading with highlights, calculates lighting per pixel.',
   },
   {
-    id: 'fastPhong',
-    name: 'Fast Phong',
-    description: 'Optimized version of Phong shading for better performance',
+    id: 'gouraud',
+    name: 'Gouraud Shading',
+    description: 'Calculates lighting at vertices only, showing mach bands at polygon edges.',
+  },
+  {
+    id: 'toon',
+    name: 'Toon Shading',
+    description: 'Cartoon-like rendering with stepped shading.',
   },
   {
     id: 'wireframe',
     name: 'Wireframe',
-    description: 'Display shape as a wireframe',
+    description: 'Displays only the edges of each polygon.',
   },
 ];
 
-export interface BackgroundOption {
-  id: string;
-  name: string;
-  color: string;
-}
-
-export const backgroundOptions: BackgroundOption[] = [
+// Lighting presets
+export const lightingPresets = [
   {
-    id: 'space',
-    name: 'Space',
-    color: '#000000',
+    id: 'default',
+    name: 'Default',
+    description: 'Standard lighting setup with ambient, diffuse, and specular lights.',
+    ambientColor: '#404040',
+    diffuseColor: '#ffffff',
+    specularColor: '#ffffff',
   },
   {
-    id: 'minimal',
-    name: 'Minimal',
-    color: '#f8fafc',
+    id: 'soft',
+    name: 'Soft',
+    description: 'Subtle lighting with a focus on ambient and diffuse illumination.',
+    ambientColor: '#505050',
+    diffuseColor: '#a0a0a0',
+    specularColor: '#303030',
+  },
+  {
+    id: 'vibrant',
+    name: 'Vibrant',
+    description: 'Bright and colorful lighting to enhance the shape\'s details.',
+    ambientColor: '#606060',
+    diffuseColor: '#f0f0f0',
+    specularColor: '#707070',
   },
   {
     id: 'dark',
     name: 'Dark',
-    color: '#09090b',
-  },
-  {
-    id: 'blue',
-    name: 'Blue',
-    color: '#0c4a6e',
-  },
-  {
-    id: 'green',
-    name: 'Green',
-    color: '#14532d',
+    description: 'Dim lighting to create a moody and dramatic effect.',
+    ambientColor: '#202020',
+    diffuseColor: '#404040',
+    specularColor: '#101010',
   },
 ];
 
-export function createMaterial(type: string, color: string = '#ffffff'): THREE.Material {
+// Background options
+export const backgroundOptions = [
+  { id: 'white', name: 'White', color: '#ffffff' },
+  { id: 'gray', name: 'Gray', color: '#808080' },
+  { id: 'black', name: 'Black', color: '#000000' },
+  { id: 'space', name: 'Space', color: '#000000' },
+];
+
+// Enhanced createMaterial function to support textures and control shading parameters
+export const createMaterial = (
+  type: string, 
+  color: string, 
+  textureUrl: string | null = null,
+  shininess: number = 30
+): THREE.Material => {
+  const colorObject = new THREE.Color(color);
+  
+  if (type === 'wireframe') {
+    return new THREE.MeshBasicMaterial({ 
+      color: colorObject, 
+      wireframe: true 
+    });
+  }
+  
+  const hasTexture = textureUrl && textureUrl !== 'none';
+  let material: THREE.Material;
+  
   switch (type) {
-    case 'wireframe':
-      return new THREE.MeshBasicMaterial({ 
-        color: new THREE.Color(color), 
-        wireframe: true 
+    case 'flat':
+      material = new THREE.MeshPhongMaterial({ 
+        color: colorObject,
+        flatShading: true,
+        shininess: shininess
       });
-    case 'constant':
-      return new THREE.MeshBasicMaterial({ 
-        color: new THREE.Color(color)
-      });
-    case 'gouraud':
-      return new THREE.MeshLambertMaterial({ 
-        color: new THREE.Color(color)
-      });
+      break;
+      
     case 'phong':
-      return new THREE.MeshPhongMaterial({ 
-        color: new THREE.Color(color),
-        shininess: 100,
-        specular: new THREE.Color("#ffffff")
+      material = new THREE.MeshPhongMaterial({ 
+        color: colorObject,
+        shininess: shininess
       });
-    case 'fastPhong':
-      return new THREE.MeshPhongMaterial({ 
-        color: new THREE.Color(color),
-        shininess: 30,
-        specular: new THREE.Color("#333333")
+      break;
+      
+    case 'gouraud':
+      // For Gouraud shading, we use LambertMaterial with specific parameters
+      // to make mach bands more visible
+      material = new THREE.MeshLambertMaterial({ 
+        color: colorObject,
+        // Lambert material doesn't use shininess, but we create high contrast
+        // by using a material that computes lighting at vertices only
       });
+      break;
+      
+    case 'toon':
+      material = new THREE.MeshToonMaterial({ 
+        color: colorObject,
+        gradientMap: null
+      });
+      break;
+      
     default:
-      return new THREE.MeshPhongMaterial({ 
-        color: new THREE.Color(color) 
+      material = new THREE.MeshStandardMaterial({ 
+        color: colorObject
       });
   }
-}
+  
+  // Apply texture if provided
+  if (hasTexture && (material as any).map !== undefined) {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(textureUrl, (texture) => {
+      (material as THREE.MeshStandardMaterial).map = texture;
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      material.needsUpdate = true;
+    });
+  }
+  
+  return material;
+};

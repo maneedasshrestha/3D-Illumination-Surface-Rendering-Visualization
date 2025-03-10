@@ -1,7 +1,8 @@
 
 import React, { useCallback } from 'react';
-import { X } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import { renderingOptions, backgroundOptions, lightingPresets } from '@/lib/lighting';
+import { defaultTextureOptions } from '@/lib/textures';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -9,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 interface RenderControlsProps {
   isOpen: boolean;
@@ -31,6 +33,9 @@ interface RenderControlsProps {
   setLightingPreset: (value: string) => void;
   showLightHelpers: boolean;
   setShowLightHelpers: (value: boolean) => void;
+  textureOption: string;
+  setTextureOption: (value: string) => void;
+  onTextureUpload: (file: File) => void;
   onBack: () => void;
 }
 
@@ -55,8 +60,13 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   setLightingPreset,
   showLightHelpers,
   setShowLightHelpers,
+  textureOption,
+  setTextureOption,
+  onTextureUpload,
   onBack,
 }) => {
+  const { toast } = useToast();
+  
   // Use callbacks to prevent unnecessary re-renders
   const handleRenderingModeChange = useCallback((value: string) => {
     setRenderingMode(value);
@@ -73,6 +83,42 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   const handleLightingPresetChange = useCallback((value: string) => {
     setLightingPreset(value);
   }, [setLightingPreset]);
+  
+  const handleTextureOptionChange = useCallback((value: string) => {
+    setTextureOption(value);
+  }, [setTextureOption]);
+  
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    
+    if (file) {
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image under 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      onTextureUpload(file);
+      toast({
+        title: "Texture uploaded",
+        description: `Applied texture: ${file.name}`,
+      });
+    }
+  }, [onTextureUpload, toast]);
 
   return (
     <aside
@@ -141,6 +187,43 @@ const RenderControls: React.FC<RenderControlsProps> = ({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="texture">Texture</Label>
+            <Select value={textureOption} onValueChange={handleTextureOptionChange}>
+              <SelectTrigger id="texture">
+                <SelectValue placeholder="Select texture" />
+              </SelectTrigger>
+              <SelectContent>
+                {defaultTextureOptions.map(option => (
+                  <SelectItem key={option.id} value={option.id}>
+                    {option.name}
+                  </SelectItem>
+                ))}
+                {textureOption === 'custom' && (
+                  <SelectItem value="custom">
+                    Custom Texture
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            
+            <div className="mt-2">
+              <Label htmlFor="textureUpload" className="cursor-pointer w-full">
+                <div className="flex items-center gap-2 border border-border p-2 rounded-md hover:bg-accent">
+                  <Upload className="h-4 w-4" />
+                  <span>Upload custom texture</span>
+                </div>
+                <Input
+                  id="textureUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </Label>
+            </div>
           </div>
         </div>
 
