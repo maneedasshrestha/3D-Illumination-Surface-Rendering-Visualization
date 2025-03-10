@@ -1,9 +1,10 @@
+
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { ShapeType, getShapeById } from '@/lib/shapes';
-import { createMaterial, lightingOptions, backgroundOptions, additionalLightOptions } from '@/lib/lighting';
+import { createMaterial, lightingOptions, backgroundOptions, additionalLightOptions, customLights } from '@/lib/lighting';
 import { getBuiltinTextureUrl } from '@/lib/textures';
 
 interface SceneProps {
@@ -24,6 +25,8 @@ interface SceneProps {
   customTextureUrl?: string | null;
   additionalLights?: string[];
   showInterference?: boolean;
+  customLightColors?: [string, string, string];
+  customLightPositions?: [[number, number, number], [number, number, number], [number, number, number]];
 }
 
 const Shape: React.FC<{ 
@@ -250,6 +253,32 @@ const AdditionalLight: React.FC<{
   );
 };
 
+// New component for custom light sources
+const CustomLight: React.FC<{
+  color: string;
+  position: [number, number, number];
+  intensity: number;
+  showHelper?: boolean;
+}> = ({ color, position, intensity, showHelper = false }) => {
+  return (
+    <>
+      <pointLight
+        color={new THREE.Color(color)}
+        position={new THREE.Vector3(...position)}
+        intensity={intensity}
+        castShadow
+      />
+      {showHelper && (
+        <LightHelper 
+          position={position}
+          color={color}
+          type="point"
+        />
+      )}
+    </>
+  );
+};
+
 const Lights: React.FC<{ 
   ambient: boolean;
   diffuse: boolean;
@@ -260,6 +289,8 @@ const Lights: React.FC<{
   showHelpers?: boolean;
   additionalLights?: string[];
   showInterference?: boolean;
+  customLightColors?: [string, string, string];
+  customLightPositions?: [[number, number, number], [number, number, number], [number, number, number]];
 }> = React.memo(({ 
   ambient, 
   diffuse, 
@@ -269,8 +300,18 @@ const Lights: React.FC<{
   specularColor = lightingOptions.specularLight.defaultColor,
   showHelpers = false,
   additionalLights = [],
-  showInterference = false
+  showInterference = false,
+  customLightColors,
+  customLightPositions
 }) => {
+  // Default positions and colors for custom lights
+  const defaultCustomLightPositions = customLights.map(light => light.defaultPosition) as [[number, number, number], [number, number, number], [number, number, number]];
+  const defaultCustomLightColors = customLights.map(light => light.defaultColor) as [string, string, string];
+  
+  // Use provided positions and colors or fall back to defaults
+  const positions = customLightPositions || defaultCustomLightPositions;
+  const colors = customLightColors || defaultCustomLightColors;
+
   return (
     <>
       {ambient && (
@@ -316,6 +357,18 @@ const Lights: React.FC<{
         </>
       )}
       
+      {/* Custom light sources */}
+      {positions.map((position, index) => (
+        <CustomLight
+          key={`custom-light-${index}`}
+          color={colors[index]}
+          position={position}
+          intensity={customLights[index].defaultIntensity}
+          showHelper={showHelpers}
+        />
+      ))}
+      
+      {/* Additional preset lights */}
       {additionalLights.map((lightId) => {
         const lightOption = additionalLightOptions.find(opt => opt.id === lightId);
         if (lightOption) {
@@ -371,13 +424,15 @@ const CanvasContainer: React.FC<SceneProps> = ({
   background,
   ambientLightColor = lightingOptions.ambientLight.defaultColor,
   diffuseLightColor = lightingOptions.diffuseLight.defaultColor,
-  specularColor = lightingOptions.specularLight.defaultColor,
+  specularLightColor = lightingOptions.specularLight.defaultColor,
   showLightHelpers = false,
   customModel,
   textureOption = 'none',
   customTextureUrl = null,
   additionalLights = [],
-  showInterference = false
+  showInterference = false,
+  customLightColors,
+  customLightPositions
 }) => {
   const bgColor = useMemo(() => {
     const bgOption = backgroundOptions.find(option => option.id === background);
@@ -400,10 +455,12 @@ const CanvasContainer: React.FC<SceneProps> = ({
         specular={specular}
         ambientColor={ambientLightColor}
         diffuseColor={diffuseLightColor}
-        specularColor={specularColor}
+        specularColor={specularLightColor}
         showHelpers={showLightHelpers}
         additionalLights={additionalLights}
         showInterference={showInterference}
+        customLightColors={customLightColors}
+        customLightPositions={customLightPositions}
       />
       
       <Shape 

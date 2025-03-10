@@ -1,7 +1,6 @@
-
 import React, { useCallback } from 'react';
 import { X, Upload } from 'lucide-react';
-import { renderingOptions, backgroundOptions, lightingPresets } from '@/lib/lighting';
+import { renderingOptions, backgroundOptions, lightingPresets, customLights } from '@/lib/lighting';
 import { defaultTextureOptions } from '@/lib/textures';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { Slider } from '@/components/ui/slider';
 
 interface RenderControlsProps {
   isOpen: boolean;
@@ -37,6 +37,10 @@ interface RenderControlsProps {
   setTextureOption: (value: string) => void;
   onTextureUpload: (file: File) => void;
   onBack: () => void;
+  customLightColors?: [string, string, string];
+  setCustomLightColor?: (index: number, color: string) => void;
+  customLightPositions?: [[number, number, number], [number, number, number], [number, number, number]];
+  setCustomLightPosition?: (index: number, axis: 'x' | 'y' | 'z', value: number) => void;
 }
 
 const RenderControls: React.FC<RenderControlsProps> = ({
@@ -64,10 +68,13 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   setTextureOption,
   onTextureUpload,
   onBack,
+  customLightColors = customLights.map(light => light.defaultColor) as [string, string, string],
+  setCustomLightColor,
+  customLightPositions = customLights.map(light => light.defaultPosition) as [[number, number, number], [number, number, number], [number, number, number]],
+  setCustomLightPosition,
 }) => {
   const { toast } = useToast();
   
-  // Use callbacks to prevent unnecessary re-renders
   const handleRenderingModeChange = useCallback((value: string) => {
     setRenderingMode(value);
   }, [setRenderingMode]);
@@ -92,7 +99,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     const file = e.target.files?.[0];
     
     if (file) {
-      // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: "File too large",
@@ -102,7 +108,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         return;
       }
       
-      // Check file type
       if (!file.type.startsWith('image/')) {
         toast({
           title: "Invalid file type",
@@ -119,6 +124,18 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       });
     }
   }, [onTextureUpload, toast]);
+
+  const handleLightColorChange = useCallback((index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    if (setCustomLightColor) {
+      setCustomLightColor(index, e.target.value);
+    }
+  }, [setCustomLightColor]);
+  
+  const handleLightPositionChange = useCallback((index: number, axis: 'x' | 'y' | 'z', value: number) => {
+    if (setCustomLightPosition) {
+      setCustomLightPosition(index, axis, value);
+    }
+  }, [setCustomLightPosition]);
 
   return (
     <aside
@@ -290,6 +307,84 @@ const RenderControls: React.FC<RenderControlsProps> = ({
               />
             </div>
           </div>
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="space-y-3">
+          <h3 className="text-lg font-medium">Custom Light Sources</h3>
+          
+          {customLights.map((light, index) => (
+            <div key={light.id} className="space-y-3 bg-accent/20 p-3 rounded-md">
+              <h4 className="font-medium">{light.name}</h4>
+              
+              <div className="space-y-2">
+                <Label htmlFor={`light-${index}-color`}>Color</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id={`light-${index}-color`}
+                    type="color"
+                    value={customLightColors[index]}
+                    onChange={(e) => handleLightColorChange(index, e)}
+                    className="w-12 h-10 p-1"
+                  />
+                  <Input
+                    type="text"
+                    value={customLightColors[index]}
+                    onChange={(e) => handleLightColorChange(index, e)}
+                    className="flex-1"
+                    placeholder="#ffffff"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Position</Label>
+                
+                <div className="grid grid-cols-[30px_1fr] gap-2 items-center">
+                  <span className="text-sm font-medium">X:</span>
+                  <div className="flex gap-2 items-center">
+                    <Slider
+                      value={[customLightPositions[index][0]]}
+                      min={-10}
+                      max={10}
+                      step={0.1}
+                      onValueChange={(value) => handleLightPositionChange(index, 'x', value[0])}
+                    />
+                    <span className="w-10 text-right text-sm">{customLightPositions[index][0].toFixed(1)}</span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-[30px_1fr] gap-2 items-center">
+                  <span className="text-sm font-medium">Y:</span>
+                  <div className="flex gap-2 items-center">
+                    <Slider
+                      value={[customLightPositions[index][1]]}
+                      min={-10}
+                      max={10}
+                      step={0.1}
+                      onValueChange={(value) => handleLightPositionChange(index, 'y', value[0])}
+                    />
+                    <span className="w-10 text-right text-sm">{customLightPositions[index][1].toFixed(1)}</span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-[30px_1fr] gap-2 items-center">
+                  <span className="text-sm font-medium">Z:</span>
+                  <div className="flex gap-2 items-center">
+                    <Slider
+                      value={[customLightPositions[index][2]]}
+                      min={-10}
+                      max={10}
+                      step={0.1}
+                      onValueChange={(value) => handleLightPositionChange(index, 'z', value[0])}
+                    />
+                    <span className="w-10 text-right text-sm">{customLightPositions[index][2].toFixed(1)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         <Separator className="my-4" />

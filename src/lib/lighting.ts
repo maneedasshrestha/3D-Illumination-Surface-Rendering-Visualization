@@ -10,12 +10,12 @@ export const lightingOptions = {
   diffuseLight: {
     defaultColor: '#ffffff',
     defaultIntensity: 0.5,
-    defaultPosition: [1, 1, 1],
+    defaultPosition: [1, 1, 1] as [number, number, number],
   },
   specularLight: {
     defaultColor: '#ffffff',
     defaultIntensity: 0.3,
-    defaultPosition: [-1, -1, -1],
+    defaultPosition: [-1, -1, -1] as [number, number, number],
   },
 };
 
@@ -26,28 +26,28 @@ export const additionalLightOptions = [
     name: 'Purple',
     color: '#9b87f5',
     defaultIntensity: 0.6,
-    defaultPosition: [3, 2, 1],
+    defaultPosition: [3, 2, 1] as [number, number, number],
   },
   {
     id: 'orange',
     name: 'Orange',
     color: '#F97316',
     defaultIntensity: 0.5,
-    defaultPosition: [-2, 3, 2],
+    defaultPosition: [-2, 3, 2] as [number, number, number],
   },
   {
     id: 'blue',
     name: 'Blue',
     color: '#0EA5E9',
     defaultIntensity: 0.4,
-    defaultPosition: [0, -3, 2],
+    defaultPosition: [0, -3, 2] as [number, number, number],
   },
   {
     id: 'green',
     name: 'Green',
     color: '#10B981',
     defaultIntensity: 0.4,
-    defaultPosition: [2, -1, -3],
+    defaultPosition: [2, -1, -3] as [number, number, number],
   },
 ];
 
@@ -121,6 +121,31 @@ export const lightingPresets = [
     ambientColor: '#303030',
     diffuseColor: '#e0e0e0',
     specularColor: '#ffffff',
+  },
+];
+
+// Custom light definitions - new addition
+export const customLights = [
+  {
+    id: 'custom1',
+    name: 'Custom Light 1',
+    defaultColor: '#9b87f5', // Purple
+    defaultIntensity: 0.6,
+    defaultPosition: [3, 2, 1] as [number, number, number],
+  },
+  {
+    id: 'custom2',
+    name: 'Custom Light 2',
+    defaultColor: '#F97316', // Orange
+    defaultIntensity: 0.5,
+    defaultPosition: [-2, 3, 2] as [number, number, number],
+  },
+  {
+    id: 'custom3',
+    name: 'Custom Light 3',
+    defaultColor: '#0EA5E9', // Blue
+    defaultIntensity: 0.4,
+    defaultPosition: [0, -3, 2] as [number, number, number],
   },
 ];
 

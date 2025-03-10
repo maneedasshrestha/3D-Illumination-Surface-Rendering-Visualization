@@ -6,7 +6,7 @@ import RenderControls from '@/components/RenderControls';
 import LoadingTransition from '@/components/LoadingTransition';
 import { ShapeType, getShapeById } from '@/lib/shapes';
 import { Button } from '@/components/ui/button';
-import { lightingOptions, lightingPresets } from '@/lib/lighting';
+import { lightingOptions, lightingPresets, customLights } from '@/lib/lighting';
 import { loadModel } from '@/lib/modelLoader';
 import { createTextureFromFile } from '@/lib/textures';
 import { useToast } from '@/hooks/use-toast';
@@ -41,6 +41,15 @@ const ShapeViewer: React.FC = () => {
   // Custom model state
   const [customModel, setCustomModel] = useState<THREE.Object3D | null>(null);
   const [customModelLoading, setCustomModelLoading] = useState(false);
+  
+  // Custom light states
+  const [customLightColors, setCustomLightColors] = useState<[string, string, string]>(
+    customLights.map(light => light.defaultColor) as [string, string, string]
+  );
+  
+  const [customLightPositions, setCustomLightPositions] = useState<[[number, number, number], [number, number, number], [number, number, number]]>(
+    customLights.map(light => light.defaultPosition) as [[number, number, number], [number, number, number], [number, number, number]]
+  );
 
   // Update light colors when preset changes
   useEffect(() => {
@@ -130,7 +139,6 @@ const ShapeViewer: React.FC = () => {
     setControlsOpen(prev => !prev);
   }, []);
 
-  // Handle render control changes with callbacks to prevent re-renders
   const handleWireframeChange = useCallback((value: boolean) => {
     setWireframe(value);
   }, []);
@@ -186,12 +194,27 @@ const ShapeViewer: React.FC = () => {
     }
   }, [toast]);
 
-  // Get the display name for the current shape
+  const handleCustomLightColorChange = useCallback((index: number, color: string) => {
+    setCustomLightColors(prev => {
+      const newColors = [...prev] as [string, string, string];
+      newColors[index] = color;
+      return newColors;
+    });
+  }, []);
+  
+  const handleCustomLightPositionChange = useCallback((index: number, axis: 'x' | 'y' | 'z', value: number) => {
+    setCustomLightPositions(prev => {
+      const newPositions = JSON.parse(JSON.stringify(prev)) as [[number, number, number], [number, number, number], [number, number, number]];
+      const axisIndex = axis === 'x' ? 0 : axis === 'y' ? 1 : 2;
+      newPositions[index][axisIndex] = value;
+      return newPositions;
+    });
+  }, []);
+
   const shapeDisplayName = shapeId === 'customModel' 
     ? sessionStorage.getItem('customModelName') || 'Custom Model' 
     : (shapeId && getShapeById(shapeId as ShapeType).name);
 
-  // Show loading if custom model is still loading
   const showLoading = isLoading || (shapeId === 'customModel' && customModelLoading);
 
   return (
@@ -239,6 +262,8 @@ const ShapeViewer: React.FC = () => {
               customModel={customModel}
               textureOption={textureOption}
               customTextureUrl={customTextureUrl}
+              customLightColors={customLightColors}
+              customLightPositions={customLightPositions}
             />
           )}
         </div>
@@ -268,6 +293,10 @@ const ShapeViewer: React.FC = () => {
           setTextureOption={handleTextureOptionChange}
           onTextureUpload={handleTextureUpload}
           onBack={handleGoBack}
+          customLightColors={customLightColors}
+          setCustomLightColor={handleCustomLightColorChange}
+          customLightPositions={customLightPositions}
+          setCustomLightPosition={handleCustomLightPositionChange}
         />
       </div>
     </LoadingTransition>
