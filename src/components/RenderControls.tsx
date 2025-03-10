@@ -1,5 +1,6 @@
+
 import React, { useCallback } from 'react';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Pause, Play } from 'lucide-react';
 import { renderingOptions, backgroundOptions, lightingPresets, customLights } from '@/lib/lighting';
 import { defaultTextureOptions } from '@/lib/textures';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,8 @@ interface RenderControlsProps {
   setCustomLightColor?: (index: number, color: string) => void;
   customLightPositions?: [[number, number, number], [number, number, number], [number, number, number]];
   setCustomLightPosition?: (index: number, axis: 'x' | 'y' | 'z', value: number) => void;
+  rotationPaused?: boolean;
+  setRotationPaused?: (value: boolean) => void;
 }
 
 const RenderControls: React.FC<RenderControlsProps> = ({
@@ -72,6 +75,8 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   setCustomLightColor,
   customLightPositions = customLights.map(light => light.defaultPosition) as [[number, number, number], [number, number, number], [number, number, number]],
   setCustomLightPosition,
+  rotationPaused = false,
+  setRotationPaused,
 }) => {
   const { toast } = useToast();
   
@@ -137,6 +142,12 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     }
   }, [setCustomLightPosition]);
 
+  const handleRotationToggle = useCallback(() => {
+    if (setRotationPaused) {
+      setRotationPaused(!rotationPaused);
+    }
+  }, [rotationPaused, setRotationPaused]);
+
   return (
     <aside
       className={`fixed right-0 top-0 bottom-0 w-80 max-w-[90vw] bg-background shadow-lg border-l border-border p-6 overflow-y-auto z-50 transform transition-transform duration-300 ease-in-out ${
@@ -155,6 +166,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       <div className="space-y-6">
         <div className="space-y-3">
           <h3 className="text-lg font-medium">Shape Display</h3>
+          
           <div className="flex items-center justify-between">
             <Label htmlFor="wireframe" className="cursor-pointer">Wireframe</Label>
             <Switch
@@ -162,6 +174,28 @@ const RenderControls: React.FC<RenderControlsProps> = ({
               checked={wireframe}
               onCheckedChange={setWireframe}
             />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <Label htmlFor="rotation" className="cursor-pointer">Shape Rotation</Label>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1"
+              onClick={handleRotationToggle}
+            >
+              {rotationPaused ? (
+                <>
+                  <Play className="h-4 w-4" />
+                  <span>Play</span>
+                </>
+              ) : (
+                <>
+                  <Pause className="h-4 w-4" />
+                  <span>Pause</span>
+                </>
+              )}
+            </Button>
           </div>
           
           <div className="space-y-2">

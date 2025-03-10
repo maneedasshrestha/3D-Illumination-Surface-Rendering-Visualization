@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Menu, ArrowLeft } from 'lucide-react';
@@ -50,6 +51,9 @@ const ShapeViewer: React.FC = () => {
   const [customLightPositions, setCustomLightPositions] = useState<[[number, number, number], [number, number, number], [number, number, number]]>(
     customLights.map(light => light.defaultPosition) as [[number, number, number], [number, number, number], [number, number, number]]
   );
+
+  // Rotation state
+  const [rotationPaused, setRotationPaused] = useState(false);
 
   // Update light colors when preset changes
   useEffect(() => {
@@ -211,6 +215,10 @@ const ShapeViewer: React.FC = () => {
     });
   }, []);
 
+  const handleRotationPauseChange = useCallback((value: boolean) => {
+    setRotationPaused(value);
+  }, []);
+
   const shapeDisplayName = shapeId === 'customModel' 
     ? sessionStorage.getItem('customModelName') || 'Custom Model' 
     : (shapeId && getShapeById(shapeId as ShapeType).name);
@@ -264,6 +272,7 @@ const ShapeViewer: React.FC = () => {
               customTextureUrl={customTextureUrl}
               customLightColors={customLightColors}
               customLightPositions={customLightPositions}
+              rotationPaused={rotationPaused}
             />
           )}
         </div>
@@ -297,6 +306,8 @@ const ShapeViewer: React.FC = () => {
           setCustomLightColor={handleCustomLightColorChange}
           customLightPositions={customLightPositions}
           setCustomLightPosition={handleCustomLightPositionChange}
+          rotationPaused={rotationPaused}
+          setRotationPaused={handleRotationPauseChange}
         />
       </div>
     </LoadingTransition>

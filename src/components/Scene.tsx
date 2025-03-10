@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Stars } from '@react-three/drei';
@@ -27,6 +26,7 @@ interface SceneProps {
   showInterference?: boolean;
   customLightColors?: [string, string, string];
   customLightPositions?: [[number, number, number], [number, number, number], [number, number, number]];
+  rotationPaused?: boolean;
 }
 
 const Shape: React.FC<{ 
@@ -37,6 +37,7 @@ const Shape: React.FC<{
   customModel?: THREE.Object3D | null;
   textureOption?: string;
   customTextureUrl?: string | null;
+  rotationPaused?: boolean;
 }> = ({ 
   shapeId, 
   wireframe, 
@@ -44,7 +45,8 @@ const Shape: React.FC<{
   shapeColor, 
   customModel,
   textureOption = 'none',
-  customTextureUrl = null
+  customTextureUrl = null,
+  rotationPaused = false
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
@@ -91,7 +93,7 @@ const Shape: React.FC<{
     }, [customModel, wireframe, renderingMode, shapeColor, textureUrl]);
     
     useFrame(() => {
-      if (groupRef.current) {
+      if (groupRef.current && !rotationPaused) {
         groupRef.current.rotation.y += 0.005;
       }
     });
@@ -131,7 +133,7 @@ const Shape: React.FC<{
   );
 
   useFrame(() => {
-    if (meshRef.current) {
+    if (meshRef.current && !rotationPaused) {
       meshRef.current.rotation.x += 0.002;
       meshRef.current.rotation.y += 0.002;
     }
@@ -253,7 +255,6 @@ const AdditionalLight: React.FC<{
   );
 };
 
-// New component for custom light sources
 const CustomLight: React.FC<{
   color: string;
   position: [number, number, number];
@@ -304,11 +305,9 @@ const Lights: React.FC<{
   customLightColors,
   customLightPositions
 }) => {
-  // Default positions and colors for custom lights
   const defaultCustomLightPositions = customLights.map(light => light.defaultPosition) as [[number, number, number], [number, number, number], [number, number, number]];
   const defaultCustomLightColors = customLights.map(light => light.defaultColor) as [string, string, string];
   
-  // Use provided positions and colors or fall back to defaults
   const positions = customLightPositions || defaultCustomLightPositions;
   const colors = customLightColors || defaultCustomLightColors;
 
@@ -357,7 +356,6 @@ const Lights: React.FC<{
         </>
       )}
       
-      {/* Custom light sources */}
       {positions.map((position, index) => (
         <CustomLight
           key={`custom-light-${index}`}
@@ -368,7 +366,6 @@ const Lights: React.FC<{
         />
       ))}
       
-      {/* Additional preset lights */}
       {additionalLights.map((lightId) => {
         const lightOption = additionalLightOptions.find(opt => opt.id === lightId);
         if (lightOption) {
@@ -432,7 +429,8 @@ const CanvasContainer: React.FC<SceneProps> = ({
   additionalLights = [],
   showInterference = false,
   customLightColors,
-  customLightPositions
+  customLightPositions,
+  rotationPaused = false
 }) => {
   const bgColor = useMemo(() => {
     const bgOption = backgroundOptions.find(option => option.id === background);
@@ -471,6 +469,7 @@ const CanvasContainer: React.FC<SceneProps> = ({
         customModel={customModel}
         textureOption={textureOption}
         customTextureUrl={customTextureUrl}
+        rotationPaused={rotationPaused}
       />
       
       <OrbitControls 
