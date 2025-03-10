@@ -19,12 +19,49 @@ export const lightingOptions = {
   },
 };
 
-// Update rendering options to replace toon shading with fast phong
+// Custom light sources
+export const additionalLightOptions = [
+  {
+    id: 'purple',
+    name: 'Purple',
+    color: '#9b87f5',
+    defaultIntensity: 0.6,
+    defaultPosition: [3, 2, 1],
+  },
+  {
+    id: 'orange',
+    name: 'Orange',
+    color: '#F97316',
+    defaultIntensity: 0.5,
+    defaultPosition: [-2, 3, 2],
+  },
+  {
+    id: 'blue',
+    name: 'Blue',
+    color: '#0EA5E9',
+    defaultIntensity: 0.4,
+    defaultPosition: [0, -3, 2],
+  },
+  {
+    id: 'green',
+    name: 'Green',
+    color: '#10B981',
+    defaultIntensity: 0.4,
+    defaultPosition: [2, -1, -3],
+  },
+];
+
+// Update rendering options to reorder and remove toon shading
 export const renderingOptions = [
   {
     id: 'flat',
     name: 'Flat Shading',
     description: 'Renders each polygon with a single color, creating a faceted look.',
+  },
+  {
+    id: 'gouraud',
+    name: 'Gouraud Shading',
+    description: 'Calculates lighting at vertices only, showing mach bands at polygon edges.',
   },
   {
     id: 'phong',
@@ -35,11 +72,6 @@ export const renderingOptions = [
     id: 'fastphong',
     name: 'Fast Phong',
     description: 'Simplified Phong shading for better performance with similar visual quality.',
-  },
-  {
-    id: 'gouraud',
-    name: 'Gouraud Shading',
-    description: 'Calculates lighting at vertices only, showing mach bands at polygon edges.',
   },
   {
     id: 'wireframe',
@@ -82,6 +114,14 @@ export const lightingPresets = [
     diffuseColor: '#404040',
     specularColor: '#101010',
   },
+  {
+    id: 'interference',
+    name: 'Interference',
+    description: 'Multiple light sources creating interesting interference patterns.',
+    ambientColor: '#303030',
+    diffuseColor: '#e0e0e0',
+    specularColor: '#ffffff',
+  },
 ];
 
 // Background options
@@ -121,9 +161,12 @@ export const createMaterial = (
       break;
       
     case 'phong':
+      // Pure Phong with smooth shading and higher shininess for contrast with Gouraud
       material = new THREE.MeshPhongMaterial({ 
         color: colorObject,
-        shininess: shininess
+        flatShading: false,
+        shininess: shininess * 2, // Higher shininess for more defined highlights
+        specular: new THREE.Color(0x444444) // More visible specular component
       });
       break;
       
@@ -138,12 +181,11 @@ export const createMaterial = (
       
     case 'gouraud':
       // For Gouraud shading, enhance mach bands by using more contrasting lighting
-      // and a material with higher reflectivity
       material = new THREE.MeshLambertMaterial({ 
         color: colorObject,
         // Increase contrast to make mach bands more visible
         emissive: new THREE.Color(0x000000),
-        emissiveIntensity: 0.1,
+        emissiveIntensity: 0.2,
         reflectivity: 1.0
       });
       break;

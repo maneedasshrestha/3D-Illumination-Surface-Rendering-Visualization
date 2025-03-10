@@ -1,10 +1,9 @@
-
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { ShapeType, getShapeById } from '@/lib/shapes';
-import { createMaterial, lightingOptions, backgroundOptions } from '@/lib/lighting';
+import { createMaterial, lightingOptions, backgroundOptions, additionalLightOptions } from '@/lib/lighting';
 import { getBuiltinTextureUrl } from '@/lib/textures';
 
 interface SceneProps {
@@ -23,6 +22,8 @@ interface SceneProps {
   customModel?: THREE.Object3D | null;
   textureOption?: string;
   customTextureUrl?: string | null;
+  additionalLights?: string[];
+  showInterference?: boolean;
 }
 
 const Shape: React.FC<{ 
@@ -45,7 +46,6 @@ const Shape: React.FC<{
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   
-  // Determine which texture to use
   const textureUrl = useMemo(() => {
     if (textureOption === 'custom' && customTextureUrl) {
       return customTextureUrl;
@@ -55,11 +55,9 @@ const Shape: React.FC<{
     return null;
   }, [textureOption, customTextureUrl]);
   
-  // Handle custom model if provided
   if (shapeId === 'customModel' && customModel) {
     console.log('Rendering custom model:', customModel);
     
-    // Apply material to custom model
     useEffect(() => {
       if (!customModel) return;
       
@@ -71,7 +69,6 @@ const Shape: React.FC<{
       
       customModel.traverse((child) => {
         if (child instanceof THREE.Mesh) {
-          // Store original material to avoid memory leaks
           if (!child.userData.originalMaterial) {
             child.userData.originalMaterial = child.material;
           }
@@ -82,7 +79,6 @@ const Shape: React.FC<{
       });
       
       return () => {
-        // Restore original materials when component unmounts
         customModel.traverse((child) => {
           if (child instanceof THREE.Mesh && child.userData.originalMaterial) {
             child.material = child.userData.originalMaterial;
@@ -97,22 +93,18 @@ const Shape: React.FC<{
       }
     });
 
-    // Fix TypeScript errors with explicit typing
     useEffect(() => {
       if (!customModel || !groupRef.current) return;
       
-      // Calculate bounding box to center the model
       const box = new THREE.Box3().setFromObject(customModel);
       const center = new THREE.Vector3();
       box.getCenter(center);
       const size = new THREE.Vector3();
       box.getSize(size);
       
-      // Calculate scale to normalize the model size
       const maxDim = Math.max(size.x, size.y, size.z);
       const scale = 2 / maxDim;
       
-      // Apply transformations to the group
       if (groupRef.current) {
         groupRef.current.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
         groupRef.current.scale.set(scale, scale, scale);
@@ -126,7 +118,6 @@ const Shape: React.FC<{
     );
   }
   
-  // Regular shape rendering
   const shape = getShapeById(shapeId);
   const geometry = useMemo(() => shape.geometry(), [shapeId]);
   
@@ -147,9 +138,9 @@ const Shape: React.FC<{
     <mesh 
       ref={meshRef}
       geometry={geometry}
-      position={[shape.defaultPosition[0], shape.defaultPosition[1], shape.defaultPosition[2]]}
-      rotation={[shape.defaultRotation[0], shape.defaultRotation[1], shape.defaultRotation[2]]}
-      scale={[shape.defaultScale[0], shape.defaultScale[1], shape.defaultScale[2]]}
+      position={new THREE.Vector3(...shape.defaultPosition)}
+      rotation={new THREE.Euler(...shape.defaultRotation)}
+      scale={new THREE.Vector3(...shape.defaultScale)}
       castShadow
       receiveShadow
     >
@@ -234,6 +225,31 @@ const LightHelper: React.FC<{
   );
 };
 
+const AdditionalLight: React.FC<{
+  color: string;
+  position: [number, number, number];
+  intensity: number;
+  showHelper?: boolean;
+}> = ({ color, position, intensity, showHelper = false }) => {
+  return (
+    <>
+      <pointLight
+        color={new THREE.Color(color)}
+        position={new THREE.Vector3(...position)}
+        intensity={intensity}
+        castShadow
+      />
+      {showHelper && (
+        <LightHelper 
+          position={position}
+          color={color}
+          type="point"
+        />
+      )}
+    </>
+  );
+};
+
 const Lights: React.FC<{ 
   ambient: boolean;
   diffuse: boolean;
@@ -242,6 +258,8 @@ const Lights: React.FC<{
   diffuseColor?: string;
   specularColor?: string;
   showHelpers?: boolean;
+  additionalLights?: string[];
+  showInterference?: boolean;
 }> = React.memo(({ 
   ambient, 
   diffuse, 
@@ -249,7 +267,9 @@ const Lights: React.FC<{
   ambientColor = lightingOptions.ambientLight.defaultColor,
   diffuseColor = lightingOptions.diffuseLight.defaultColor,
   specularColor = lightingOptions.specularLight.defaultColor,
-  showHelpers = false
+  showHelpers = false,
+  additionalLights = [],
+  showInterference = false
 }) => {
   return (
     <>
@@ -265,12 +285,12 @@ const Lights: React.FC<{
           <directionalLight
             color={new THREE.Color(diffuseColor)}
             intensity={lightingOptions.diffuseLight.defaultIntensity}
-            position={lightingOptions.diffuseLight.defaultPosition}
+            position={new THREE.Vector3(...lightingOptions.diffuseLight.defaultPosition)}
             castShadow
           />
           {showHelpers && (
             <LightHelper 
-              position={lightingOptions.diffuseLight.defaultPosition} 
+              position={lightingOptions.diffuseLight.defaultPosition}
               color={diffuseColor}
               type="directional"
             />
@@ -283,16 +303,55 @@ const Lights: React.FC<{
           <pointLight
             color={new THREE.Color(specularColor)}
             intensity={lightingOptions.specularLight.defaultIntensity}
-            position={lightingOptions.specularLight.defaultPosition}
+            position={new THREE.Vector3(...lightingOptions.specularLight.defaultPosition)}
             castShadow
           />
           {showHelpers && (
             <LightHelper 
-              position={lightingOptions.specularLight.defaultPosition} 
+              position={lightingOptions.specularLight.defaultPosition}
               color={specularColor}
               type="point"
             />
           )}
+        </>
+      )}
+      
+      {additionalLights.map((lightId) => {
+        const lightOption = additionalLightOptions.find(opt => opt.id === lightId);
+        if (lightOption) {
+          return (
+            <AdditionalLight
+              key={lightId}
+              color={lightOption.color}
+              position={lightOption.defaultPosition as [number, number, number]}
+              intensity={lightOption.defaultIntensity}
+              showHelper={showHelpers}
+            />
+          );
+        }
+        return null;
+      })}
+      
+      {showInterference && (
+        <>
+          <AdditionalLight
+            color="#9b87f5"
+            position={[3, 2, 1]}
+            intensity={0.4}
+            showHelper={showHelpers}
+          />
+          <AdditionalLight
+            color="#F97316"
+            position={[-2, 3, 2]}
+            intensity={0.4}
+            showHelper={showHelpers}
+          />
+          <AdditionalLight
+            color="#0EA5E9"
+            position={[0, -3, 2]}
+            intensity={0.4}
+            showHelper={showHelpers}
+          />
         </>
       )}
     </>
@@ -312,11 +371,13 @@ const CanvasContainer: React.FC<SceneProps> = ({
   background,
   ambientLightColor = lightingOptions.ambientLight.defaultColor,
   diffuseLightColor = lightingOptions.diffuseLight.defaultColor,
-  specularLightColor = lightingOptions.specularLight.defaultColor,
-  showLightHelpers = true,
+  specularColor = lightingOptions.specularLight.defaultColor,
+  showLightHelpers = false,
   customModel,
   textureOption = 'none',
-  customTextureUrl = null
+  customTextureUrl = null,
+  additionalLights = [],
+  showInterference = false
 }) => {
   const bgColor = useMemo(() => {
     const bgOption = backgroundOptions.find(option => option.id === background);
@@ -339,8 +400,10 @@ const CanvasContainer: React.FC<SceneProps> = ({
         specular={specular}
         ambientColor={ambientLightColor}
         diffuseColor={diffuseLightColor}
-        specularColor={specularLightColor}
+        specularColor={specularColor}
         showHelpers={showLightHelpers}
+        additionalLights={additionalLights}
+        showInterference={showInterference}
       />
       
       <Shape 
