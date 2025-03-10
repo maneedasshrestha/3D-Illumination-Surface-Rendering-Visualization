@@ -1,3 +1,4 @@
+
 import * as THREE from 'three';
 
 // Lighting options
@@ -18,7 +19,7 @@ export const lightingOptions = {
   },
 };
 
-// Update rendering options to include Gouraud shading with visible mach bands
+// Update rendering options to replace toon shading with fast phong
 export const renderingOptions = [
   {
     id: 'flat',
@@ -31,14 +32,14 @@ export const renderingOptions = [
     description: 'Smooth shading with highlights, calculates lighting per pixel.',
   },
   {
+    id: 'fastphong',
+    name: 'Fast Phong',
+    description: 'Simplified Phong shading for better performance with similar visual quality.',
+  },
+  {
     id: 'gouraud',
     name: 'Gouraud Shading',
     description: 'Calculates lighting at vertices only, showing mach bands at polygon edges.',
-  },
-  {
-    id: 'toon',
-    name: 'Toon Shading',
-    description: 'Cartoon-like rendering with stepped shading.',
   },
   {
     id: 'wireframe',
@@ -126,20 +127,24 @@ export const createMaterial = (
       });
       break;
       
-    case 'gouraud':
-      // For Gouraud shading, we use LambertMaterial with specific parameters
-      // to make mach bands more visible
-      material = new THREE.MeshLambertMaterial({ 
+    case 'fastphong':
+      // Fast phong is a simplified version with lower quality but better performance
+      material = new THREE.MeshPhongMaterial({ 
         color: colorObject,
-        // Lambert material doesn't use shininess, but we create high contrast
-        // by using a material that computes lighting at vertices only
+        shininess: shininess / 2,
+        specular: new THREE.Color(0x111111)
       });
       break;
       
-    case 'toon':
-      material = new THREE.MeshToonMaterial({ 
+    case 'gouraud':
+      // For Gouraud shading, enhance mach bands by using more contrasting lighting
+      // and a material with higher reflectivity
+      material = new THREE.MeshLambertMaterial({ 
         color: colorObject,
-        gradientMap: null
+        // Increase contrast to make mach bands more visible
+        emissive: new THREE.Color(0x000000),
+        emissiveIntensity: 0.1,
+        reflectivity: 1.0
       });
       break;
       

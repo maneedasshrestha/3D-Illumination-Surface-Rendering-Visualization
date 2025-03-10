@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Menu, ArrowLeft } from 'lucide-react';
@@ -37,7 +36,7 @@ const ShapeViewer: React.FC = () => {
   const [ambientLightColor, setAmbientLightColor] = useState(lightingPresets[0].ambientColor);
   const [diffuseLightColor, setDiffuseLightColor] = useState(lightingPresets[0].diffuseColor);
   const [specularLightColor, setSpecularLightColor] = useState(lightingPresets[0].specularColor);
-  const [showLightHelpers, setShowLightHelpers] = useState(true);
+  const [showLightHelpers, setShowLightHelpers] = useState(false);
   
   // Custom model state
   const [customModel, setCustomModel] = useState<THREE.Object3D | null>(null);

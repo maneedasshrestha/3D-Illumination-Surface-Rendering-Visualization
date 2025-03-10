@@ -97,14 +97,16 @@ const Shape: React.FC<{
       }
     });
 
-    // Center and scale the model
+    // Fix TypeScript errors with explicit typing
     useEffect(() => {
       if (!customModel || !groupRef.current) return;
       
       // Calculate bounding box to center the model
       const box = new THREE.Box3().setFromObject(customModel);
-      const center = box.getCenter(new THREE.Vector3());
-      const size = box.getSize(new THREE.Vector3());
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      const size = new THREE.Vector3();
+      box.getSize(size);
       
       // Calculate scale to normalize the model size
       const maxDim = Math.max(size.x, size.y, size.z);
@@ -145,9 +147,9 @@ const Shape: React.FC<{
     <mesh 
       ref={meshRef}
       geometry={geometry}
-      position={new THREE.Vector3(...shape.defaultPosition)}
-      rotation={new THREE.Euler(...shape.defaultRotation)}
-      scale={new THREE.Vector3(...shape.defaultScale)}
+      position={[shape.defaultPosition[0], shape.defaultPosition[1], shape.defaultPosition[2]]}
+      rotation={[shape.defaultRotation[0], shape.defaultRotation[1], shape.defaultRotation[2]]}
+      scale={[shape.defaultScale[0], shape.defaultScale[1], shape.defaultScale[2]]}
       castShadow
       receiveShadow
     >
