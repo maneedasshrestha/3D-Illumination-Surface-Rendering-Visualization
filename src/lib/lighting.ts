@@ -1,4 +1,3 @@
-
 import * as THREE from 'three';
 
 // Lighting options
@@ -124,26 +123,26 @@ export const lightingPresets = [
   },
 ];
 
-// Custom light definitions - new addition
+// Custom light definitions - set all default colors to white
 export const customLights = [
   {
     id: 'custom1',
     name: 'Custom Light 1',
-    defaultColor: '#9b87f5', // Purple
+    defaultColor: '#ffffff', // Changed to white
     defaultIntensity: 0.6,
     defaultPosition: [3, 2, 1] as [number, number, number],
   },
   {
     id: 'custom2',
     name: 'Custom Light 2',
-    defaultColor: '#F97316', // Orange
+    defaultColor: '#ffffff', // Changed to white
     defaultIntensity: 0.5,
     defaultPosition: [-2, 3, 2] as [number, number, number],
   },
   {
     id: 'custom3',
     name: 'Custom Light 3',
-    defaultColor: '#0EA5E9', // Blue
+    defaultColor: '#ffffff', // Changed to white
     defaultIntensity: 0.4,
     defaultPosition: [0, -3, 2] as [number, number, number],
   },

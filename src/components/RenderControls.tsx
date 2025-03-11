@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import { X, Upload, Pause, Play } from 'lucide-react';
 import { renderingOptions, backgroundOptions, lightingPresets, customLights } from '@/lib/lighting';
@@ -177,25 +176,12 @@ const RenderControls: React.FC<RenderControlsProps> = ({
           </div>
           
           <div className="flex items-center justify-between">
-            <Label htmlFor="rotation" className="cursor-pointer">Shape Rotation</Label>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center gap-1"
-              onClick={handleRotationToggle}
-            >
-              {rotationPaused ? (
-                <>
-                  <Play className="h-4 w-4" />
-                  <span>Play</span>
-                </>
-              ) : (
-                <>
-                  <Pause className="h-4 w-4" />
-                  <span>Pause</span>
-                </>
-              )}
-            </Button>
+            <Label htmlFor="rotation" className="cursor-pointer">Rotation</Label>
+            <Switch
+              id="rotation"
+              checked={!rotationPaused}
+              onCheckedChange={(checked) => setRotationPaused && setRotationPaused(!checked)}
+            />
           </div>
           
           <div className="space-y-2">
